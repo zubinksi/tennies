@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Tennies",
+    "slug": "tennies",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": ["ios"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tennies.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "Tennies reads your step count to track your daily progress toward ten thousand steps.",
+        "NSHealthUpdateUsageDescription": "Tennies needs HealthKit write access to log your activity."
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
+      }
+    },
+    "plugins": [
+      [
+        "react-native-health",
+        {
+          "NSHealthShareUsageDescription": "Tennies reads your step count to track your daily progress toward ten thousand steps.",
+          "NSHealthUpdateUsageDescription": "Tennies needs HealthKit write access to log your activity."
+        }
+      ]
+    ]
+  }
+}
