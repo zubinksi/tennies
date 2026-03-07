@@ -138,7 +138,7 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) =>
     <View style={styles.container}>
       <WebView
         ref={webViewRef}
-        source={{ html: CHART_HTML }}
+        source={{ html: CHART_HTML, baseUrl: 'https://esm.sh' }}
         style={styles.webView}
         javaScriptEnabled
         scrollEnabled={false}
