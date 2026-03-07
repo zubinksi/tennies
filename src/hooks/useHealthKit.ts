@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import AppleHealthKit, {
-  HealthKitPermissions,
-  HealthValue,
-} from 'react-native-health';
+
+// Defensively import react-native-health — on unsupported simulators or
+// misconfigured builds the native module may not exist, which would crash
+// the JS bridge before any React renders.
+let AppleHealthKit: any = null;
+try {
+  AppleHealthKit = require('react-native-health').default;
+} catch (_e) {
+  // Native module unavailable; the hook will surface isAuthorized: false.
+}
 
 export interface ChartPoint {
   time: number; // Unix timestamp in seconds
@@ -18,12 +24,14 @@ export interface HealthData {
   isLoading: boolean;
 }
 
-const PERMISSIONS: HealthKitPermissions = {
-  permissions: {
-    read: [AppleHealthKit.Constants.Permissions.StepCount],
-    write: [],
-  },
-};
+const PERMISSIONS = AppleHealthKit
+  ? {
+      permissions: {
+        read: [AppleHealthKit.Constants.Permissions.StepCount],
+        write: [],
+      },
+    }
+  : { permissions: { read: [], write: [] } };
 
 const startOfDay = (date: Date = new Date()): Date => {
   const d = new Date(date);
@@ -39,7 +47,7 @@ const getStepCount = (start: Date, end: Date): Promise<number> =>
         endDate: end.toISOString(),
         unit: 'count',
       },
-      (_error: string, result: HealthValue) => {
+      (_error: string, result: any) => {
         resolve(result?.value ?? 0);
       },
     );
@@ -48,7 +56,7 @@ const getStepCount = (start: Date, end: Date): Promise<number> =>
 const getDailyStepSamples = (
   startDate: Date,
   endDate: Date,
-): Promise<HealthValue[]> =>
+): Promise<any[]> =>
   new Promise((resolve) => {
     AppleHealthKit.getDailyStepCountSamples(
       {
@@ -56,7 +64,7 @@ const getDailyStepSamples = (
         endDate: endDate.toISOString(),
         unit: 'count',
       },
-      (_error: string, results: HealthValue[]) => {
+      (_error: string, results: any[]) => {
         resolve(results ?? []);
       },
     );
@@ -144,6 +152,12 @@ export const useHealthKit = (): HealthData => {
   }, []);
 
   useEffect(() => {
+    // If the native module failed to load, show not-authorized immediately.
+    if (!AppleHealthKit) {
+      setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
+      return;
+    }
+
     let refreshInterval: ReturnType<typeof setInterval>;
     let didRespond = false;
 
