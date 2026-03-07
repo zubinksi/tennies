@@ -145,17 +145,35 @@ export const useHealthKit = (): HealthData => {
 
   useEffect(() => {
     let refreshInterval: ReturnType<typeof setInterval>;
+    let didRespond = false;
 
-    AppleHealthKit.initHealthKit(PERMISSIONS, (error: string) => {
-      if (error) {
+    // Safety net: if HealthKit never calls back (entitlement issue / crash),
+    // show the not-authorized state rather than staying blank forever.
+    const timeout = setTimeout(() => {
+      if (!didRespond) {
         setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
-        return;
       }
-      fetchData();
-      refreshInterval = setInterval(fetchData, 5 * 60 * 1000);
-    });
+    }, 5000);
+
+    try {
+      AppleHealthKit.initHealthKit(PERMISSIONS, (error: string) => {
+        didRespond = true;
+        clearTimeout(timeout);
+        if (error) {
+          setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
+          return;
+        }
+        fetchData();
+        refreshInterval = setInterval(fetchData, 5 * 60 * 1000);
+      });
+    } catch (_e) {
+      didRespond = true;
+      clearTimeout(timeout);
+      setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
+    }
 
     return () => {
+      clearTimeout(timeout);
       if (refreshInterval) clearInterval(refreshInterval);
     };
   }, [fetchData]);

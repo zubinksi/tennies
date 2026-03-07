@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { ChartPoint } from '../hooks/useHealthKit';
@@ -10,7 +10,8 @@ interface StepChartProps {
 }
 
 // The chart HTML is a self-contained React app using Liveline from esm.sh.
-// It listens for postMessage events from React Native and updates the chart.
+// It posts CHART_READY once the message listener is set up, then React Native
+// sends data. This avoids the race where onLoad fires before ES modules load.
 const CHART_HTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -45,9 +46,14 @@ const CHART_HTML = `<!DOCTYPE html>
             }
           } catch (_) {}
         };
-        // React Native WebView fires on window on iOS, document on Android
         window.addEventListener('message', handle);
         document.addEventListener('message', handle);
+
+        // Signal React Native that the listener is ready. RN will send data now.
+        try {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'CHART_READY' }));
+        } catch (_) {}
+
         return () => {
           window.removeEventListener('message', handle);
           document.removeEventListener('message', handle);
@@ -63,7 +69,6 @@ const CHART_HTML = `<!DOCTYPE html>
           loading: chartState.loading,
           theme: 'light',
           color: '#111111',
-          // Show the full 24-hour day so the line grows left to right
           window: 86400,
           grid: true,
           fill: true,
@@ -92,14 +97,13 @@ const CHART_HTML = `<!DOCTYPE html>
 
 export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) => {
   const webViewRef = useRef<WebView>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  // Keep latest data in a ref so we can send it whenever the chart is ready
+  const pendingRef = useRef<{ data: ChartPoint[]; value: number } | null>(null);
+  const isChartReadyRef = useRef(false);
 
-  // Send updated step data to the WebView whenever it changes
-  useEffect(() => {
-    if (!webViewRef.current || !isLoaded) return;
-
-    const payload = JSON.stringify({ type: 'STEP_DATA', data, value });
-    // injectJavaScript must return a truthy value
+  const sendData = useCallback((d: ChartPoint[], v: number) => {
+    if (!webViewRef.current) return;
+    const payload = JSON.stringify({ type: 'STEP_DATA', data: d, value: v });
     webViewRef.current.injectJavaScript(`
       (function() {
         var e = new MessageEvent('message', { data: ${JSON.stringify(payload)} });
@@ -107,7 +111,28 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) =>
       })();
       true;
     `);
-  }, [data, value, isLoaded]);
+  }, []);
+
+  // Cache the latest data; send it immediately if chart is already ready
+  useEffect(() => {
+    pendingRef.current = { data, value };
+    if (isChartReadyRef.current) {
+      sendData(data, value);
+    }
+  }, [data, value, sendData]);
+
+  const handleMessage = useCallback((e: WebViewMessageEvent) => {
+    try {
+      const msg = JSON.parse(e.nativeEvent.data);
+      if (msg.type === 'CHART_READY') {
+        isChartReadyRef.current = true;
+        // Send whatever data we have at this point
+        if (pendingRef.current) {
+          sendData(pendingRef.current.data, pendingRef.current.value);
+        }
+      }
+    } catch (_) {}
+  }, [sendData]);
 
   return (
     <View style={styles.container}>
@@ -119,9 +144,7 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) =>
         scrollEnabled={false}
         originWhitelist={['*']}
         allowsInlineMediaPlayback={false}
-        onLoad={() => setIsLoaded(true)}
-        // Suppress console noise from the chart library
-        onMessage={(_e: WebViewMessageEvent) => {}}
+        onMessage={handleMessage}
       />
     </View>
   );
