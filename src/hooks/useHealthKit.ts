@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 // the JS bridge before any React renders.
 let AppleHealthKit: any = null;
 try {
-  AppleHealthKit = require('react-native-health').default;
+  AppleHealthKit = require('react-native-health');
 } catch (_e) {
   // Native module unavailable; the hook will surface isAuthorized: false.
 }
@@ -154,7 +154,7 @@ export const useHealthKit = (): HealthData => {
   useEffect(() => {
     // If the native module failed to load, show not-authorized immediately.
     if (!AppleHealthKit) {
-      console.log('[HealthKit] Native module not available (require failed)');
+      console.log('[HealthKit] Native module not available');
       setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
       return;
     }
