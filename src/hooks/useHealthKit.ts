@@ -154,9 +154,12 @@ export const useHealthKit = (): HealthData => {
   useEffect(() => {
     // If the native module failed to load, show not-authorized immediately.
     if (!AppleHealthKit) {
+      console.log('[HealthKit] Native module not available (require failed)');
       setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
       return;
     }
+
+    console.log('[HealthKit] Native module loaded, calling initHealthKit...');
 
     let refreshInterval: ReturnType<typeof setInterval>;
     let didRespond = false;
@@ -165,6 +168,7 @@ export const useHealthKit = (): HealthData => {
     // show the not-authorized state rather than staying blank forever.
     const timeout = setTimeout(() => {
       if (!didRespond) {
+        console.log('[HealthKit] Timeout — initHealthKit never called back. Likely missing entitlement or provisioning profile issue.');
         setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
       }
     }, 5000);
@@ -174,15 +178,18 @@ export const useHealthKit = (): HealthData => {
         didRespond = true;
         clearTimeout(timeout);
         if (error) {
+          console.log('[HealthKit] initHealthKit error:', error);
           setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
           return;
         }
+        console.log('[HealthKit] Authorized successfully');
         fetchData();
         refreshInterval = setInterval(fetchData, 5 * 60 * 1000);
       });
     } catch (_e) {
       didRespond = true;
       clearTimeout(timeout);
+      console.log('[HealthKit] initHealthKit threw an exception:', _e);
       setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
     }
 
