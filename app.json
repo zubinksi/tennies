@@ -5,6 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#F9F9F9"
+    },
     "platforms": ["ios"],
     "ios": {
       "supportsTablet": false,
