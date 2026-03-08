@@ -32,12 +32,14 @@ export interface HealthData {
 const walkingPerms = (() => {
   if (!AppleHealthKit?.Constants?.Permissions) return [];
   const p = AppleHealthKit.Constants.Permissions;
-  return [
+  const perms = [
     p.WalkingSpeed,
     p.WalkingStepLength,
     p.WalkingAsymmetryPercentage,
     p.WalkingDoubleSupportPercentage,
   ].filter(Boolean);
+  console.log('[HealthKit] walkingPerms resolved:', perms);
+  return perms;
 })();
 
 const PERMISSIONS = AppleHealthKit
@@ -48,6 +50,8 @@ const PERMISSIONS = AppleHealthKit
       },
     }
   : { permissions: { read: [], write: [] } };
+
+console.log('[HealthKit] PERMISSIONS.read:', PERMISSIONS.permissions.read);
 
 const startOfDay = (date: Date = new Date()): Date => {
   const d = new Date(date);
@@ -104,10 +108,17 @@ const getLatestWalkingMetric = (type: string): Promise<number | null> => {
         limit: 1,
       };
       AppleHealthKit.getSamples(opts, (_err: any, res: any[]) => {
-        if (_err || !Array.isArray(res) || !res.length) {
+        if (_err) {
+          console.log(`[HealthKit] getSamples error for ${type}:`, JSON.stringify(_err));
           resolve(null);
           return;
         }
+        if (!Array.isArray(res) || !res.length) {
+          console.log(`[HealthKit] getSamples no data for ${type}, result:`, JSON.stringify(res));
+          resolve(null);
+          return;
+        }
+        console.log(`[HealthKit] getSamples ${type} result[0]:`, JSON.stringify(res[0]));
         const val = res[0].value;
         resolve(typeof val === 'number' ? val : null);
       });
@@ -210,6 +221,7 @@ export const useHealthKit = (): HealthData => {
         getLatestWalkingMetric('WalkingAsymmetryPercentage'),
         getLatestWalkingMetric('WalkingDoubleSupportPercentage'),
       ]);
+    console.log('[HealthKit] walking metrics:', { walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST });
 
     setData({
       todaySteps,
