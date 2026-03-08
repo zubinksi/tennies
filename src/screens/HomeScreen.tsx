@@ -66,10 +66,10 @@ export const HomeScreen: React.FC = () => {
   const tennyPct = ready ? `${Math.round((todaySteps / 10000) * 100)}%` : '--';
 
   const statsMetrics = [
-    { key: 'tennyProgress', label: 'tenny progress', value: tennyPct },
-    { key: 'avg', label: '30d avg', value: ready ? formatNumber(averageSteps) : '--' },
-    { key: 'streak', label: 'day streak', value: ready ? String(streak) : '--' },
-    { key: 'allTime', label: 'all time tennies', value: ready ? formatNumber(allTimeDays) : '--' },
+    { key: 'tennyProgress', label: ["Today's", 'Progress'], value: tennyPct },
+    { key: 'avg', label: ['Avg', 'Steps'], value: ready ? formatNumber(averageSteps) : '--' },
+    { key: 'streak', label: ['Tenny', 'Streak'], value: ready ? String(streak) : '--' },
+    { key: 'allTime', label: ['All-time', 'Tennies'], value: ready ? formatNumber(allTimeDays) : '--' },
   ];
 
   const advancedMetrics = [
@@ -112,7 +112,8 @@ export const HomeScreen: React.FC = () => {
               <React.Fragment key={m.key}>
                 {i > 0 && <View style={styles.advancedDivider} />}
                 <View style={styles.advancedMetric}>
-                  <Text style={styles.advancedLabel}>{m.label}</Text>
+                  <Text style={styles.advancedLabel}>{m.label[0]}</Text>
+                  <Text style={styles.advancedLabel}>{m.label[1]}</Text>
                   <Text style={styles.advancedValue}>{m.value}</Text>
                 </View>
               </React.Fragment>
