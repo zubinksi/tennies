@@ -116,7 +116,7 @@ const getLatestWalkingMetric = (type: string): Promise<number | null> => {
           return;
         }
         console.log(`[HealthKit] getSamples ${type} result[0]:`, JSON.stringify(res[0]));
-        const val = res[0].value;
+        const val = res[0].quantity ?? res[0].value;
         resolve(typeof val === 'number' ? val : null);
       });
     } catch {
