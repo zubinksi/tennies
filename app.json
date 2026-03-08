@@ -14,7 +14,7 @@
       "bundleIdentifier": "com.tennies.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSHealthShareUsageDescription": "Tennies reads your step count to track your daily progress toward ten thousand steps.",
+        "NSHealthShareUsageDescription": "Tennies reads your step count and walking metrics (speed, step length, asymmetry, and double support time) to track your daily progress and pedestrian performance.",
         "NSHealthUpdateUsageDescription": "Tennies needs HealthKit write access to log your activity."
       },
       "entitlements": {
@@ -27,7 +27,7 @@
       [
         "react-native-health",
         {
-          "NSHealthShareUsageDescription": "Tennies reads your step count to track your daily progress toward ten thousand steps.",
+          "NSHealthShareUsageDescription": "Tennies reads your step count and walking metrics (speed, step length, asymmetry, and double support time) to track your daily progress and pedestrian performance.",
           "NSHealthUpdateUsageDescription": "Tennies needs HealthKit write access to log your activity."
         }
       ]

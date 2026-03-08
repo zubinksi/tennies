@@ -87,20 +87,23 @@ const getDailyStepSamples = (startDate: Date, endDate: Date): Promise<any[]> =>
     );
   });
 
-// Fetch the most recent sample of a walking metric using a named HealthKit method.
-const getLatestWalkingMetric = (methodName: string | undefined): Promise<number | null> => {
-  if (!AppleHealthKit || !methodName) return Promise.resolve(null);
-  const fetcher: Function | undefined = AppleHealthKit[methodName];
-  if (typeof fetcher !== 'function') return Promise.resolve(null);
+// Fetch the most recent sample of a walking metric via the generic getSamples API.
+// react-native-health does not expose individual methods for walking metrics —
+// all are accessed through getSamples({ type: '<TypeName>', ... }).
+const getLatestWalkingMetric = (type: string): Promise<number | null> => {
+  if (!AppleHealthKit || typeof AppleHealthKit.getSamples !== 'function') {
+    return Promise.resolve(null);
+  }
   return new Promise((resolve) => {
     try {
       const opts = {
+        type,
         startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
         endDate: new Date().toISOString(),
         ascending: false,
         limit: 1,
       };
-      fetcher.call(AppleHealthKit, opts, (_err: any, res: any[]) => {
+      AppleHealthKit.getSamples(opts, (_err: any, res: any[]) => {
         if (_err || !Array.isArray(res) || !res.length) {
           resolve(null);
           return;
@@ -202,10 +205,10 @@ export const useHealthKit = (): HealthData => {
 
     const [walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST] =
       await Promise.all([
-        getLatestWalkingMetric('getWalkingSpeed'),
-        getLatestWalkingMetric('getWalkingStepLength'),
-        getLatestWalkingMetric('getWalkingAsymmetryPercentage'),
-        getLatestWalkingMetric('getWalkingDoubleSupportPercentage'),
+        getLatestWalkingMetric('WalkingSpeed'),
+        getLatestWalkingMetric('WalkingStepLength'),
+        getLatestWalkingMetric('WalkingAsymmetryPercentage'),
+        getLatestWalkingMetric('WalkingDoubleSupportPercentage'),
       ]);
 
     setData({
