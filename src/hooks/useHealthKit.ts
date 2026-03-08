@@ -87,9 +87,11 @@ const getDailyStepSamples = (startDate: Date, endDate: Date): Promise<any[]> =>
     );
   });
 
-// Fetch the most recent sample of a walking metric by type string.
-const getLatestWalkingMetric = (type: string | undefined): Promise<number | null> => {
-  if (!AppleHealthKit || !type) return Promise.resolve(null);
+// Fetch the most recent sample of a walking metric using a named HealthKit method.
+const getLatestWalkingMetric = (methodName: string | undefined): Promise<number | null> => {
+  if (!AppleHealthKit || !methodName) return Promise.resolve(null);
+  const fetcher: Function | undefined = AppleHealthKit[methodName];
+  if (typeof fetcher !== 'function') return Promise.resolve(null);
   return new Promise((resolve) => {
     try {
       const opts = {
@@ -97,14 +99,7 @@ const getLatestWalkingMetric = (type: string | undefined): Promise<number | null
         endDate: new Date().toISOString(),
         ascending: false,
         limit: 1,
-        type,
       };
-      const fetcher: Function | undefined =
-        AppleHealthKit.getQuantitySamples ?? AppleHealthKit.getSamples;
-      if (typeof fetcher !== 'function') {
-        resolve(null);
-        return;
-      }
       fetcher.call(AppleHealthKit, opts, (_err: any, res: any[]) => {
         if (_err || !Array.isArray(res) || !res.length) {
           resolve(null);
@@ -205,13 +200,12 @@ export const useHealthKit = (): HealthData => {
 
     const allTimeDays = [...stepsByDate.values()].filter((v) => v >= 10000).length;
 
-    const perms = AppleHealthKit?.Constants?.Permissions;
     const [walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST] =
       await Promise.all([
-        getLatestWalkingMetric(perms?.WalkingSpeed),
-        getLatestWalkingMetric(perms?.WalkingStepLength),
-        getLatestWalkingMetric(perms?.WalkingAsymmetryPercentage),
-        getLatestWalkingMetric(perms?.WalkingDoubleSupportPercentage),
+        getLatestWalkingMetric('getWalkingSpeed'),
+        getLatestWalkingMetric('getWalkingStepLength'),
+        getLatestWalkingMetric('getWalkingAsymmetryPercentage'),
+        getLatestWalkingMetric('getWalkingDoubleSupportPercentage'),
       ]);
 
     setData({
