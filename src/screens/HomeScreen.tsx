@@ -67,13 +67,13 @@ export const HomeScreen: React.FC = () => {
   const ready = !isLoading && isAuthorized;
 
   // Conditional colors
-  const streakColor = ready && streak > 0 ? '#46482E' : colors.text;
+  const streakColor = ready && streak > 0 ? '#599a59' : colors.text;
 
   const speedColor =
     speedMph == null
       ? '#FFFFFF'
       : speedMph >= 2
-      ? '#46482E'
+      ? '#599a59'
       : speedMph >= 1
       ? '#86EFAC'
       : '#FDE047';
@@ -82,14 +82,14 @@ export const HomeScreen: React.FC = () => {
     walkingAsymmetry == null
       ? '#FFFFFF'
       : walkingAsymmetry < 5
-      ? '#46482E'
+      ? '#599a59'
       : '#f97316';
 
   const dstColor =
     walkingDST == null
       ? '#FFFFFF'
       : walkingDST >= 20 && walkingDST <= 40
-      ? '#46482E'
+      ? '#599a59'
       : '#f97316';
 
   const statsMetrics = [
@@ -199,7 +199,7 @@ export const HomeScreen: React.FC = () => {
 
         {/* Advanced Metrics */}
         <View style={styles.advancedSection}>
-          <Text style={styles.sectionTitle}>Advanced Metrics</Text>
+          <Text style={styles.sectionTitle}>Advanced Stride Analysis</Text>
           <View style={styles.advancedCard}>
             <View style={styles.advancedRow}>
               {advancedMetrics.map((m, i) => (
@@ -326,9 +326,6 @@ const styles = StyleSheet.create({
     paddingRight: spacing.lg,
   },
   advancedCard: {
-    backgroundColor: '#3A3A3A',
-    borderRadius: 5,
-    padding: spacing.md,
     gap: spacing.md,
   },
   advancedRow: {
