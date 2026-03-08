@@ -235,7 +235,7 @@ export const HomeScreen: React.FC = () => {
 
             <View style={styles.gaitRow}>
               <Text style={styles.gaitLabel}>Gait Style: </Text>
-              <Text style={[styles.gaitValue, { color: '#000000' }]}>
+              <Text style={[styles.gaitValue, { color: '#599a59' }]}>
                 {gaitStyle}
               </Text>
             </View>
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   advancedLabelDark: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#000000',
+    color: colors.textMuted,
   },
   advancedLabelClickable: {},
   advancedLabelOpen: {
