@@ -21,8 +21,8 @@ export const HomeScreen: React.FC = () => {
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         {/* Wordmark */}
-        <Text style={styles.wordmark}>tennies</Text>
-        <Text style={styles.subheader}>be pedestrian. get ten thousand steps a day.</Text>
+        <Text style={styles.wordmark}>Tennies</Text>
+        <Text style={styles.subheader}>Be Pedestrian. Get ten thousand steps a day.</Text>
 
         {/* Chart */}
         <View style={styles.chartWrapper}>

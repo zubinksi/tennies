@@ -401,8 +401,8 @@ function resolveTheme(color, mode) {
     // Dash line
     dashLine: rgba(r, g, b, 0.4),
     // Reference line
-    refLine: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.12)",
-    refLabel: isDark ? "rgba(255, 255, 255, 0.45)" : "rgba(0, 0, 0, 0.4)",
+    refLine: isDark ? "rgba(249, 115, 22, 0.5)" : "rgba(249, 115, 22, 0.5)",
+    refLabel: isDark ? "rgba(249, 115, 22, 0.8)" : "rgba(249, 115, 22, 0.8)",
     // Time axis
     timeLabel: isDark ? "rgba(255, 255, 255, 0.35)" : "rgba(0, 0, 0, 0.3)",
     // Crosshair
@@ -4407,7 +4407,7 @@ function LivelineTransition({
         value: chartState.value,
         loading: chartState.loading,
         theme: 'light',
-        color: '#111111',
+        color: '#f97316',
         window: chartState.window,
         grid: true,
         fill: true,
