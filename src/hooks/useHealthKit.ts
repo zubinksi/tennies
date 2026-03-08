@@ -29,23 +29,20 @@ export interface HealthData {
   isLoading: boolean;
 }
 
-const walkingPerms = (() => {
-  if (!AppleHealthKit?.Constants?.Permissions) return [];
-  const p = AppleHealthKit.Constants.Permissions;
-  const perms = [
-    p.WalkingSpeed,
-    p.WalkingStepLength,
-    p.WalkingAsymmetryPercentage,
-    p.WalkingDoubleSupportPercentage,
-  ].filter(Boolean);
-  console.log('[HealthKit] walkingPerms resolved:', perms);
-  return perms;
-})();
+// Use string literals directly — avoids stale Metro bundle cache issues
+// where patch-package additions to node_modules/react-native-health/src/constants
+// may not be reflected in the cached bundle.
+const WALKING_PERM_TYPES = [
+  'WalkingSpeed',
+  'WalkingStepLength',
+  'WalkingAsymmetryPercentage',
+  'WalkingDoubleSupportPercentage',
+];
 
 const PERMISSIONS = AppleHealthKit
   ? {
       permissions: {
-        read: [AppleHealthKit.Constants.Permissions.StepCount, ...walkingPerms],
+        read: ['StepCount', ...WALKING_PERM_TYPES],
         write: [],
       },
     }
