@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingLeft: spacing.lg,
-    paddingRight: spacing.xs,
+    paddingRight: 2,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
