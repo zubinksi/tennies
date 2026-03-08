@@ -10,9 +10,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@expo-google-fonts/space-mono": "^0.4.2",
     "expo": "~52.0.11",
-    "expo-font": "^55.0.4",
     "expo-status-bar": "~2.0.1",
     "liveline": "^0.0.6",
     "react": "18.3.1",

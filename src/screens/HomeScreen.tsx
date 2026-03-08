@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   wordmark: {
     fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'SpaceMono_700Bold',
+    fontFamily: 'Menlo',
     color: colors.text,
     marginBottom: spacing.xs,
   },
