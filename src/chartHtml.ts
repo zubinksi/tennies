@@ -4370,7 +4370,7 @@ function LivelineTransition({
   var Liveline = window.Liveline;
 
   function Chart() {
-    var state = React.useState({ data: [], value: 0, loading: true });
+    var state = React.useState({ data: [], value: 0, loading: true, window: 86400 });
     var chartState = state[0];
     var setChartState = state[1];
 
@@ -4380,7 +4380,11 @@ function LivelineTransition({
           var raw = typeof e.data === 'string' ? e.data : JSON.stringify(e.data);
           var msg = JSON.parse(raw);
           if (msg.type === 'STEP_DATA') {
-            setChartState({ data: msg.data, value: msg.value, loading: false });
+            // Compute window from data span (midnight → now) so the chart
+            // always fills its x-axis with exactly today's data.
+            var d = msg.data;
+            var w = d.length > 1 ? (d[d.length - 1].time - d[0].time + 60) : 86400;
+            setChartState({ data: d, value: msg.value, loading: false, window: w });
           }
         } catch (_) {}
       }
@@ -4404,7 +4408,7 @@ function LivelineTransition({
         loading: chartState.loading,
         theme: 'light',
         color: '#111111',
-        window: 86400,
+        window: chartState.window,
         grid: true,
         fill: true,
         badge: true,

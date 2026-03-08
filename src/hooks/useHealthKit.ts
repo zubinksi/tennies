@@ -39,16 +39,19 @@ const startOfDay = (date: Date = new Date()): Date => {
   return d;
 };
 
-const getStepCount = (start: Date, end: Date): Promise<number> =>
+// Returns all raw step samples for today (each sample has a start/end time
+// and a step count for that interval — pedometer data is already segmented).
+const getTodaySamples = (start: Date, end: Date): Promise<any[]> =>
   new Promise((resolve) => {
-    AppleHealthKit.getStepCount(
+    AppleHealthKit.getSamples(
       {
+        type: AppleHealthKit.Constants.Observers.StepCount,
         startDate: start.toISOString(),
         endDate: end.toISOString(),
-        unit: 'count',
+        ascending: true,
       },
-      (_error: string, result: any) => {
-        resolve(result?.value ?? 0);
+      (_error: string, results: any[]) => {
+        resolve(results ?? []);
       },
     );
   });
@@ -84,23 +87,35 @@ export const useHealthKit = (): HealthData => {
     const now = new Date();
     const today = startOfDay(now);
 
-    // Build hourly cumulative step data for today's chart.
-    // Each point represents total steps from midnight up to that hour.
+    // Fetch all raw pedometer samples for today, then accumulate them into
+    // 5-minute cumulative buckets so the chart shows smooth step growth.
+    const rawSamples = await getTodaySamples(today, now);
+    rawSamples.sort(
+      (a: any, b: any) =>
+        new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+    );
+
+    const BUCKET_MS = 5 * 60 * 1000; // 5-minute buckets
     const chartData: ChartPoint[] = [{ time: today.getTime() / 1000, value: 0 }];
-    const currentHour = now.getHours();
+    let cumulative = 0;
+    let sampleIdx = 0;
+    let bucketEnd = today.getTime() + BUCKET_MS;
 
-    for (let h = 1; h <= currentHour + 1; h++) {
-      const end = new Date(today);
-      end.setHours(h, 0, 0, 0);
-      if (end > now) end.setTime(now.getTime());
-
-      const steps = await getStepCount(today, end);
-      chartData.push({ time: end.getTime() / 1000, value: steps });
-
-      if (end.getTime() >= now.getTime()) break;
+    while (bucketEnd <= now.getTime() + BUCKET_MS) {
+      const t = Math.min(bucketEnd, now.getTime());
+      while (
+        sampleIdx < rawSamples.length &&
+        new Date(rawSamples[sampleIdx].endDate).getTime() <= t
+      ) {
+        cumulative += rawSamples[sampleIdx].value ?? 0;
+        sampleIdx++;
+      }
+      chartData.push({ time: t / 1000, value: cumulative });
+      if (t >= now.getTime()) break;
+      bucketEnd += BUCKET_MS;
     }
 
-    const todaySteps = chartData[chartData.length - 1]?.value ?? 0;
+    const todaySteps = cumulative;
 
     // Fetch last 30 days for average and streak
     const thirtyDaysAgo = new Date(today);
