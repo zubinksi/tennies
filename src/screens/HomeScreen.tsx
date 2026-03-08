@@ -83,14 +83,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingLeft: spacing.lg,
-    paddingRight: spacing.sm,
+    paddingRight: spacing.xs,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
 
   // Wordmark
   wordmark: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '400',
     color: colors.text,
     marginBottom: spacing.xs,
