@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
@@ -51,7 +50,6 @@ export const HomeScreen: React.FC = () => {
   const toggle = (key: string) =>
     setOpenTooltip((prev) => (prev === key ? null : key));
 
-  // Walking speed in mph for classification (1 mph = 0.44704 m/s)
   const speedMph = walkingSpeed != null ? walkingSpeed * 2.23694 : null;
   const classification =
     speedMph != null ? (speedMph >= 1 ? 'Very Pedestrian' : 'Pedestrian') : null;
@@ -63,6 +61,16 @@ export const HomeScreen: React.FC = () => {
     v == null ? '--' : `${Math.round(v * 39.3701)} in`;
   const fmtPct = (v: number | null) =>
     v == null ? '--' : `${Math.round(v)}%`;
+
+  const ready = !isLoading && isAuthorized;
+  const tennyPct = ready ? `${Math.round((todaySteps / 10000) * 100)}%` : '--';
+
+  const statsMetrics = [
+    { key: 'tennyProgress', label: 'tenny progress', value: tennyPct },
+    { key: 'avg', label: '30d avg', value: ready ? formatNumber(averageSteps) : '--' },
+    { key: 'streak', label: 'day streak', value: ready ? String(streak) : '--' },
+    { key: 'allTime', label: 'all time tennies', value: ready ? formatNumber(allTimeDays) : '--' },
+  ];
 
   const advancedMetrics = [
     { key: 'speed', label: 'Walk Speed', value: fmtSpeed(walkingSpeed) },
@@ -89,49 +97,26 @@ export const HomeScreen: React.FC = () => {
           <StepChart data={chartData} value={todaySteps} loading={isLoading} />
         </View>
 
-        {/* Hero row: steps today + 30d avg */}
-        <View style={styles.heroRow}>
-          <View style={styles.heroMain}>
-            {isLoading ? (
-              <ActivityIndicator size="small" color={colors.textMuted} />
-            ) : !isAuthorized ? (
-              <Text style={styles.errorText}>
-                Enable HealthKit access in Settings to track your steps.
-              </Text>
-            ) : (
-              <>
-                <Text style={styles.heroNumber}>{formatNumber(todaySteps)}</Text>
-                <Text style={styles.heroLabel}>steps today</Text>
-              </>
-            )}
-          </View>
+        {/* Error state */}
+        {!isLoading && !isAuthorized && (
+          <Text style={styles.errorText}>
+            Enable HealthKit access in Settings to track your steps.
+          </Text>
+        )}
 
-          {isAuthorized && !isLoading && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.heroSide}>
-                <Text style={styles.metricNumber}>{formatNumber(averageSteps)}</Text>
-                <Text style={styles.metricLabel}>30d avg</Text>
-              </View>
-            </>
-          )}
-        </View>
-
-        {/* Aim text */}
-        <Text style={styles.aimText}>Aim for a tenny: 10,000 steps per day</Text>
-
-        {/* Streak + all time tennies */}
-        <View style={styles.metricsRow}>
-          <View style={styles.metric}>
-            <Text style={styles.metricNumber}>{streak}</Text>
-            <Text style={styles.metricLabel}>day streak</Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.metric}>
-            <Text style={styles.metricNumber}>{formatNumber(allTimeDays)}</Text>
-            <Text style={styles.metricLabel}>all time tennies</Text>
+        {/* Stats Section */}
+        <View style={styles.metricsSection}>
+          <Text style={styles.sectionTitle}>Aim for a tenny: 10,000 steps per day</Text>
+          <View style={styles.advancedRow}>
+            {statsMetrics.map((m, i) => (
+              <React.Fragment key={m.key}>
+                {i > 0 && <View style={styles.advancedDivider} />}
+                <View style={styles.advancedMetric}>
+                  <Text style={styles.advancedLabel}>{m.label}</Text>
+                  <Text style={styles.advancedValue}>{m.value}</Text>
+                </View>
+              </React.Fragment>
+            ))}
           </View>
         </View>
 
@@ -151,6 +136,7 @@ export const HomeScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.advancedLabel,
+                        styles.advancedLabelClickable,
                         openTooltip === m.key && styles.advancedLabelOpen,
                       ]}
                     >
@@ -197,7 +183,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontStyle: 'italic',
     color: colors.text,
-    letterSpacing: 3,
     marginBottom: spacing.xs,
   },
   subheader: {
@@ -217,77 +202,22 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
 
-  // Hero row
-  heroRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    minHeight: 72,
-  },
-  heroMain: {
-    flex: 3,
-  },
-  heroSide: {
-    flex: 2,
-    gap: spacing.xs,
-  },
-  heroNumber: {
-    fontSize: 52,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 56,
-    letterSpacing: -2,
-  },
-  heroLabel: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
   errorText: {
     fontSize: 14,
     color: colors.textMuted,
     lineHeight: 20,
-  },
-
-  // Aim text
-  aimText: {
-    fontSize: 13,
-    color: colors.textMuted,
     marginBottom: spacing.lg,
   },
 
-  // Metrics
-  metricsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  // Stats section (tenny progress, 30d avg, streak, all time)
+  metricsSection: {
+    gap: spacing.md,
     paddingVertical: spacing.lg,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
     marginBottom: spacing.xl,
-  },
-  metric: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  metricNumber: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  metricLabel: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: colors.textMuted,
-  },
-  divider: {
-    width: StyleSheet.hairlineWidth,
-    height: 40,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.lg,
   },
 
   // Advanced Metrics
@@ -318,6 +248,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: colors.textMuted,
+  },
+  advancedLabelClickable: {
     textDecorationLine: 'underline',
   },
   advancedLabelOpen: {

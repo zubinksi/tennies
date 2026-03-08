@@ -120,7 +120,7 @@ const html = `<!DOCTYPE html>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body, #root { width: 100%; height: 100%; }
-    body { background: #F9F9F9; overflow: hidden; }
+    body { background: #EBEBEB; overflow: hidden; }
   </style>
 </head>
 <body>

@@ -7,7 +7,7 @@ export const CHART_HTML = `<!DOCTYPE html>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body, #root { width: 100%; height: 100%; }
-    body { background: #F9F9F9; overflow: hidden; }
+    body { background: #EBEBEB; overflow: hidden; }
   </style>
 </head>
 <body>
@@ -401,8 +401,8 @@ function resolveTheme(color, mode) {
     // Dash line
     dashLine: rgba(r, g, b, 0.4),
     // Reference line
-    refLine: isDark ? "rgba(249, 115, 22, 0.5)" : "rgba(249, 115, 22, 0.5)",
-    refLabel: isDark ? "rgba(249, 115, 22, 0.8)" : "rgba(249, 115, 22, 0.8)",
+    refLine: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.12)",
+    refLabel: isDark ? "rgba(255, 255, 255, 0.45)" : "rgba(0, 0, 0, 0.4)",
     // Time axis
     timeLabel: isDark ? "rgba(255, 255, 255, 0.35)" : "rgba(0, 0, 0, 0.3)",
     // Crosshair
@@ -4407,7 +4407,7 @@ function LivelineTransition({
         value: chartState.value,
         loading: chartState.loading,
         theme: 'light',
-        color: '#f97316',
+        color: '#111111',
         window: chartState.window,
         grid: true,
         fill: true,
@@ -4416,7 +4416,7 @@ function LivelineTransition({
         pulse: false,
         momentum: false,
         scrub: true,
-        referenceLine: { value: 10000, label: '10,000 steps' },
+        referenceLine: { value: 10000, label: '10k' },
         formatValue: function (v) { return Math.round(v).toLocaleString(); },
         formatTime: function (t) {
           var d = new Date(t * 1000);
