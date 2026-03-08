@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
 
   // Highlights section
   metricsSection: {
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingVertical: spacing.lg,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
