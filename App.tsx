@@ -2,6 +2,8 @@ import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
+import { SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import { HomeScreen } from './src/screens/HomeScreen';
 
 interface ErrorBoundaryState {
@@ -64,6 +66,12 @@ const errorStyles = StyleSheet.create({
 });
 
 export default function App() {
+  const [fontsLoaded] = useFonts({ SpaceMono_700Bold });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>

@@ -5,6 +5,7 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StepChart } from '../components/StepChart';
@@ -12,13 +13,6 @@ import { useHealthKit } from '../hooks/useHealthKit';
 import { colors, spacing } from '../theme';
 
 const formatNumber = (n: number): string => n.toLocaleString('en-US');
-
-const getTodayLabel = (): string =>
-  new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
 
 const TOOLTIPS: Record<string, string> = {
   speed:
@@ -29,6 +23,16 @@ const TOOLTIPS: Record<string, string> = {
     'Walking asymmetry is the percent of time that your steps with one foot are faster or slower than the other foot. This means the lower the percentage of asymmetry, the healthier your walking pattern.',
   dst:
     'Double Support Time is the percentage of time during a walk that both feet are on the ground. A lower value means you spend more of your walk with your weight on one foot instead of two, which can be a sign of better balance. During a typical walk, this measure will fall between 20 to 40%.',
+};
+
+const getGaitStyle = (mph: number | null): string => {
+  if (mph == null) return '--';
+  if (mph >= 2.5) return 'Power';
+  if (mph >= 2.0) return 'Swagger';
+  if (mph >= 1.5) return 'Strut';
+  if (mph >= 1.0) return 'Saunter';
+  if (mph >= 0.5) return 'Mosey';
+  return 'Trudge';
 };
 
 export const HomeScreen: React.FC = () => {
@@ -51,9 +55,7 @@ export const HomeScreen: React.FC = () => {
     setOpenTooltip((prev) => (prev === key ? null : key));
 
   const speedMph = walkingSpeed != null ? walkingSpeed * 2.23694 : null;
-  const classification =
-    speedMph != null ? (speedMph >= 1 ? 'Very Pedestrian' : 'Pedestrian') : null;
-  const classColor = classification === 'Very Pedestrian' ? '#22c55e' : '#f97316';
+  const gaitStyle = getGaitStyle(speedMph);
 
   const fmtSpeed = (v: number | null) =>
     v == null ? '--' : `${(v * 2.23694).toFixed(1)} mph`;
@@ -63,21 +65,96 @@ export const HomeScreen: React.FC = () => {
     v == null ? '--' : `${Math.round(v)}%`;
 
   const ready = !isLoading && isAuthorized;
-  const tennyPct = ready ? `${Math.round((todaySteps / 10000) * 100)}%` : '--';
+
+  // Conditional colors
+  const streakColor = ready && streak > 0 ? '#46482E' : colors.text;
+
+  const speedColor =
+    speedMph == null
+      ? '#FFFFFF'
+      : speedMph >= 2
+      ? '#46482E'
+      : speedMph >= 1
+      ? '#86EFAC'
+      : '#FDE047';
+
+  const asymmetryColor =
+    walkingAsymmetry == null
+      ? '#FFFFFF'
+      : walkingAsymmetry < 5
+      ? '#46482E'
+      : '#f97316';
+
+  const dstColor =
+    walkingDST == null
+      ? '#FFFFFF'
+      : walkingDST >= 20 && walkingDST <= 40
+      ? '#46482E'
+      : '#f97316';
 
   const statsMetrics = [
-    { key: 'tennyProgress', label: ["Today's", 'Progress'], value: tennyPct },
-    { key: 'avg', label: ['Avg', 'Steps'], value: ready ? formatNumber(averageSteps) : '--' },
-    { key: 'streak', label: ['Tenny', 'Streak'], value: ready ? String(streak) : '--' },
-    { key: 'allTime', label: ['All-time', 'Tennies'], value: ready ? formatNumber(allTimeDays) : '--' },
+    {
+      key: 'tennyProgress',
+      label: ["Today's", 'Steps'],
+      value: ready ? formatNumber(todaySteps) : '--',
+      valueColor: colors.text,
+    },
+    {
+      key: 'avg',
+      label: ['30D', 'Avg'],
+      value: ready ? formatNumber(averageSteps) : '--',
+      valueColor: colors.text,
+    },
+    {
+      key: 'streak',
+      label: ['10K', 'Streak'],
+      value: ready ? String(streak) : '--',
+      valueColor: streakColor,
+    },
+    {
+      key: 'allTime',
+      label: ['All-time', '10Ks'],
+      value: ready ? formatNumber(allTimeDays) : '--',
+      valueColor: colors.text,
+    },
   ];
 
   const advancedMetrics = [
-    { key: 'speed', label: 'Walk Speed', value: fmtSpeed(walkingSpeed) },
-    { key: 'stepLength', label: 'Step Length', value: fmtLength(walkingStepLength) },
-    { key: 'asymmetry', label: 'Asymmetry', value: fmtPct(walkingAsymmetry) },
-    { key: 'dst', label: 'DST', value: fmtPct(walkingDST) },
+    {
+      key: 'speed',
+      label: 'Walk Speed',
+      value: fmtSpeed(walkingSpeed),
+      valueColor: speedColor,
+    },
+    {
+      key: 'stepLength',
+      label: 'Step Length',
+      value: fmtLength(walkingStepLength),
+      valueColor: '#FFFFFF',
+    },
+    {
+      key: 'asymmetry',
+      label: 'Asymmetry',
+      value: fmtPct(walkingAsymmetry),
+      valueColor: asymmetryColor,
+    },
+    {
+      key: 'dst',
+      label: 'DST',
+      value: fmtPct(walkingDST),
+      valueColor: dstColor,
+    },
   ];
+
+  const handleShare = async () => {
+    const steps = ready ? formatNumber(todaySteps) : '0';
+    const gait = speedMph != null ? gaitStyle : 'unknown';
+    try {
+      await Share.share({
+        message: `Today's walk: ${steps} steps · Gait style: ${gait} 🚶`,
+      });
+    } catch (_) {}
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -88,9 +165,6 @@ export const HomeScreen: React.FC = () => {
         {/* Wordmark */}
         <Text style={styles.wordmark}>TENNIES</Text>
         <Text style={styles.subheader}>Pedestrian Performance Monitoring</Text>
-
-        {/* Date */}
-        <Text style={styles.dateText}>{getTodayLabel()}</Text>
 
         {/* Chart */}
         <View style={styles.chartWrapper}>
@@ -104,17 +178,19 @@ export const HomeScreen: React.FC = () => {
           </Text>
         )}
 
-        {/* Stats Section */}
+        {/* Highlights Section */}
         <View style={styles.metricsSection}>
-          <Text style={styles.sectionTitle}>Aim for a tenny: 10,000 steps per day</Text>
-          <View style={styles.advancedRow}>
+          <Text style={styles.sectionTitle}>Highlights</Text>
+          <View style={styles.statsRow}>
             {statsMetrics.map((m, i) => (
               <React.Fragment key={m.key}>
-                {i > 0 && <View style={styles.advancedDivider} />}
+                {i > 0 && <View style={styles.statsDivider} />}
                 <View style={styles.advancedMetric}>
                   <Text style={styles.advancedLabel}>{m.label[0]}</Text>
                   <Text style={styles.advancedLabel}>{m.label[1]}</Text>
-                  <Text style={styles.advancedValue}>{m.value}</Text>
+                  <Text style={[styles.advancedValue, { color: m.valueColor }]}>
+                    {m.value}
+                  </Text>
                 </View>
               </React.Fragment>
             ))}
@@ -124,44 +200,53 @@ export const HomeScreen: React.FC = () => {
         {/* Advanced Metrics */}
         <View style={styles.advancedSection}>
           <Text style={styles.sectionTitle}>Advanced Metrics</Text>
-
-          <View style={styles.advancedRow}>
-            {advancedMetrics.map((m, i) => (
-              <React.Fragment key={m.key}>
-                {i > 0 && <View style={styles.advancedDivider} />}
-                <View style={styles.advancedMetric}>
-                  <TouchableOpacity
-                    onPress={() => toggle(m.key)}
-                    hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-                  >
-                    <Text
-                      style={[
-                        styles.advancedLabel,
-                        styles.advancedLabelClickable,
-                        openTooltip === m.key && styles.advancedLabelOpen,
-                      ]}
+          <View style={styles.advancedCard}>
+            <View style={styles.advancedRow}>
+              {advancedMetrics.map((m, i) => (
+                <React.Fragment key={m.key}>
+                  {i > 0 && <View style={styles.advancedDivider} />}
+                  <View style={styles.advancedMetric}>
+                    <TouchableOpacity
+                      onPress={() => toggle(m.key)}
+                      hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
                     >
-                      {m.label}
+                      <Text
+                        style={[
+                          styles.advancedLabelDark,
+                          styles.advancedLabelClickable,
+                          openTooltip === m.key && styles.advancedLabelOpen,
+                        ]}
+                      >
+                        {m.label}
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.advancedValue, { color: m.valueColor }]}>
+                      {m.value}
                     </Text>
-                  </TouchableOpacity>
-                  <Text style={styles.advancedValue}>{m.value}</Text>
-                </View>
-              </React.Fragment>
-            ))}
-          </View>
-
-          {openTooltip && (
-            <View style={styles.tooltipBox}>
-              <Text style={styles.tooltipText}>{TOOLTIPS[openTooltip]}</Text>
+                  </View>
+                </React.Fragment>
+              ))}
             </View>
-          )}
 
-          {classification && (
-            <Text style={[styles.classificationLabel, { color: classColor }]}>
-              Advanced Metrics: {classification}
-            </Text>
-          )}
+            {openTooltip && (
+              <View style={styles.tooltipBox}>
+                <Text style={styles.tooltipText}>{TOOLTIPS[openTooltip]}</Text>
+              </View>
+            )}
+
+            <View style={styles.gaitRow}>
+              <Text style={styles.gaitLabel}>Gait Style: </Text>
+              <Text style={[styles.gaitValue, { color: speedColor }]}>
+                {gaitStyle}
+              </Text>
+            </View>
+          </View>
         </View>
+
+        {/* Share Button */}
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Text style={styles.shareButtonText}>Share Today's Walk</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -173,7 +258,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEBEB',
   },
   container: {
-    paddingHorizontal: spacing.lg,
+    paddingLeft: spacing.lg,
+    paddingRight: 0,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
@@ -182,7 +268,7 @@ const styles = StyleSheet.create({
   wordmark: {
     fontSize: 20,
     fontWeight: '700',
-    fontStyle: 'italic',
+    fontFamily: 'SpaceMono_700Bold',
     color: colors.text,
     marginBottom: spacing.xs,
   },
@@ -192,15 +278,10 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: spacing.md,
   },
-  dateText: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginBottom: spacing.sm,
-  },
 
   // Chart
   chartWrapper: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
   },
 
   errorText: {
@@ -210,7 +291,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
 
-  // Stats section (tenny progress, 30d avg, streak, all time)
+  // Highlights section
   metricsSection: {
     gap: spacing.md,
     paddingVertical: spacing.lg,
@@ -218,17 +299,37 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
-    marginBottom: spacing.xl,
-  },
-
-  // Advanced Metrics
-  advancedSection: {
-    gap: spacing.md,
+    marginBottom: spacing.lg,
+    paddingRight: spacing.lg,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  statsDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 36,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.sm,
+    alignSelf: 'center',
+  },
+
+  // Advanced Metrics
+  advancedSection: {
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    paddingRight: spacing.lg,
+  },
+  advancedCard: {
+    backgroundColor: '#3A3A3A',
+    borderRadius: 5,
+    padding: spacing.md,
+    gap: spacing.md,
   },
   advancedRow: {
     flexDirection: 'row',
@@ -241,7 +342,7 @@ const styles = StyleSheet.create({
   advancedDivider: {
     width: StyleSheet.hairlineWidth,
     height: 36,
-    backgroundColor: colors.border,
+    backgroundColor: '#555555',
     marginHorizontal: spacing.sm,
     alignSelf: 'center',
   },
@@ -249,6 +350,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: colors.textMuted,
+  },
+  advancedLabelDark: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#AAAAAA',
   },
   advancedLabelClickable: {
     textDecorationLine: 'underline',
@@ -259,21 +365,50 @@ const styles = StyleSheet.create({
   advancedValue: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
     letterSpacing: -0.3,
   },
   tooltipBox: {
-    backgroundColor: '#E0E0E0',
-    borderRadius: 10,
+    backgroundColor: '#2A2A2A',
+    borderRadius: 8,
     padding: spacing.md,
   },
   tooltipText: {
     fontSize: 13,
-    color: colors.textMuted,
+    color: '#AAAAAA',
     lineHeight: 19,
   },
-  classificationLabel: {
+  gaitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: spacing.xs,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#555555',
+  },
+  gaitLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#AAAAAA',
+  },
+  gaitValue: {
     fontSize: 14,
     fontWeight: '600',
+  },
+
+  // Share button
+  shareButton: {
+    marginRight: spacing.lg,
+    marginTop: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 5,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+  },
+  shareButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
   },
 });

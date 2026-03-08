@@ -4407,7 +4407,7 @@ function LivelineTransition({
         value: chartState.value,
         loading: chartState.loading,
         theme: 'light',
-        color: '#f97316',
+        color: '#46482E',
         window: chartState.window,
         grid: true,
         fill: true,
@@ -4416,7 +4416,7 @@ function LivelineTransition({
         pulse: false,
         momentum: false,
         scrub: true,
-        referenceLine: { value: 10000, label: '10k' },
+        referenceLine: { value: 10000, label: 'Reach 10K Daily Steps' },
         formatValue: function (v) { return Math.round(v).toLocaleString(); },
         formatTime: function (t) {
           var d = new Date(t * 1000);
