@@ -62,7 +62,7 @@ export const HomeScreen: React.FC = () => {
   const fmtLength = (v: number | null) =>
     v == null ? '--' : `${Math.round(v * 39.3701)} in`;
   const fmtPct = (v: number | null) =>
-    v == null ? '--' : `${Math.round(v)}%`;
+    v == null ? '--' : `${Math.round(v * 100)}%`;
 
   const ready = !isLoading && isAuthorized;
 
@@ -81,14 +81,14 @@ export const HomeScreen: React.FC = () => {
   const asymmetryColor =
     walkingAsymmetry == null
       ? '#FFFFFF'
-      : walkingAsymmetry < 5
+      : walkingAsymmetry < 0.05
       ? '#599a59'
       : '#f97316';
 
   const dstColor =
     walkingDST == null
       ? '#FFFFFF'
-      : walkingDST >= 20 && walkingDST <= 40
+      : walkingDST >= 0.20 && walkingDST <= 0.40
       ? '#599a59'
       : '#f97316';
 
