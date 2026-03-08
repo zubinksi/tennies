@@ -39,16 +39,17 @@ const startOfDay = (date: Date = new Date()): Date => {
   return d;
 };
 
-// Returns all raw step samples for today (each sample has a start/end time
-// and a step count for that interval — pedometer data is already segmented).
+// Returns step count samples in 5-minute buckets for today.
+// Each sample: { value: stepsInInterval, startDate, endDate }
 const getTodaySamples = (start: Date, end: Date): Promise<any[]> =>
   new Promise((resolve) => {
-    AppleHealthKit.getSamples(
+    AppleHealthKit.getDailyStepCountSamples(
       {
-        type: AppleHealthKit.Constants.Observers.StepCount,
         startDate: start.toISOString(),
         endDate: end.toISOString(),
+        period: 5,
         ascending: true,
+        includeManuallyAdded: true,
       },
       (_error: string, results: any[]) => {
         resolve(results ?? []);
@@ -65,7 +66,8 @@ const getDailyStepSamples = (
       {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        unit: 'count',
+        period: 1440, // 24h buckets — one value per day
+        includeManuallyAdded: true,
       },
       (_error: string, results: any[]) => {
         resolve(results ?? []);
