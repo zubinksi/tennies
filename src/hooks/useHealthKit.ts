@@ -21,14 +21,29 @@ export interface HealthData {
   averageSteps: number;
   streak: number;
   allTimeDays: number;
+  walkingSpeed: number | null;     // m/s from HealthKit
+  walkingStepLength: number | null; // meters from HealthKit
+  walkingAsymmetry: number | null;  // percentage (0–100)
+  walkingDST: number | null;        // percentage (0–100)
   isAuthorized: boolean;
   isLoading: boolean;
 }
 
+const walkingPerms = (() => {
+  if (!AppleHealthKit?.Constants?.Permissions) return [];
+  const p = AppleHealthKit.Constants.Permissions;
+  return [
+    p.WalkingSpeed,
+    p.WalkingStepLength,
+    p.WalkingAsymmetryPercentage,
+    p.WalkingDoubleSupportPercentage,
+  ].filter(Boolean);
+})();
+
 const PERMISSIONS = AppleHealthKit
   ? {
       permissions: {
-        read: [AppleHealthKit.Constants.Permissions.StepCount],
+        read: [AppleHealthKit.Constants.Permissions.StepCount, ...walkingPerms],
         write: [],
       },
     }
@@ -41,7 +56,6 @@ const startOfDay = (date: Date = new Date()): Date => {
 };
 
 // Returns step count samples in 5-minute buckets for today.
-// Each sample: { value: stepsInInterval, startDate, endDate }
 const getTodaySamples = (start: Date, end: Date): Promise<any[]> =>
   new Promise((resolve) => {
     AppleHealthKit.getDailyStepCountSamples(
@@ -58,10 +72,7 @@ const getTodaySamples = (start: Date, end: Date): Promise<any[]> =>
     );
   });
 
-const getDailyStepSamples = (
-  startDate: Date,
-  endDate: Date,
-): Promise<any[]> =>
+const getDailyStepSamples = (startDate: Date, endDate: Date): Promise<any[]> =>
   new Promise((resolve) => {
     AppleHealthKit.getDailyStepCountSamples(
       {
@@ -76,6 +87,38 @@ const getDailyStepSamples = (
     );
   });
 
+// Fetch the most recent sample of a walking metric by type string.
+const getLatestWalkingMetric = (type: string | undefined): Promise<number | null> => {
+  if (!AppleHealthKit || !type) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    try {
+      const opts = {
+        startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+        endDate: new Date().toISOString(),
+        ascending: false,
+        limit: 1,
+        type,
+      };
+      const fetcher: Function | undefined =
+        AppleHealthKit.getQuantitySamples ?? AppleHealthKit.getSamples;
+      if (typeof fetcher !== 'function') {
+        resolve(null);
+        return;
+      }
+      fetcher.call(AppleHealthKit, opts, (_err: any, res: any[]) => {
+        if (_err || !Array.isArray(res) || !res.length) {
+          resolve(null);
+          return;
+        }
+        const val = res[0].value;
+        resolve(typeof val === 'number' ? val : null);
+      });
+    } catch {
+      resolve(null);
+    }
+  });
+};
+
 export const useHealthKit = (): HealthData => {
   const [data, setData] = useState<HealthData>({
     todaySteps: 0,
@@ -83,6 +126,10 @@ export const useHealthKit = (): HealthData => {
     averageSteps: 0,
     streak: 0,
     allTimeDays: 0,
+    walkingSpeed: null,
+    walkingStepLength: null,
+    walkingAsymmetry: null,
+    walkingDST: null,
     isAuthorized: false,
     isLoading: true,
   });
@@ -91,15 +138,13 @@ export const useHealthKit = (): HealthData => {
     const now = new Date();
     const today = startOfDay(now);
 
-    // Fetch all raw pedometer samples for today, then accumulate them into
-    // 5-minute cumulative buckets so the chart shows smooth step growth.
     const rawSamples = await getTodaySamples(today, now);
     rawSamples.sort(
       (a: any, b: any) =>
         new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
     );
 
-    const BUCKET_MS = 5 * 60 * 1000; // 5-minute buckets
+    const BUCKET_MS = 5 * 60 * 1000;
     const chartData: ChartPoint[] = [{ time: today.getTime() / 1000, value: 0 }];
     let cumulative = 0;
     let sampleIdx = 0;
@@ -121,12 +166,9 @@ export const useHealthKit = (): HealthData => {
 
     const todaySteps = cumulative;
 
-    // Fetch from 2015 onwards for average, streak, and all-time count.
-    // Apple Watch launched in 2015 — this covers all realistic HealthKit history.
     const epoch = new Date('2015-01-01T00:00:00.000Z');
     const dailySamples = await getDailyStepSamples(epoch, now);
 
-    // Build date → steps map (excluding today, which we already have)
     const stepsByDate = new Map<string, number>();
     for (const sample of dailySamples) {
       const key = startOfDay(new Date(sample.startDate)).toDateString();
@@ -134,7 +176,6 @@ export const useHealthKit = (): HealthData => {
     }
     stepsByDate.set(today.toDateString(), todaySteps);
 
-    // Average: mean of the last 30 completed past days that have data
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentKeys = [...stepsByDate.keys()].filter((k) => {
@@ -149,7 +190,6 @@ export const useHealthKit = (): HealthData => {
           )
         : 0;
 
-    // Streak: consecutive days ending today with >= 10k steps
     let streak = 0;
     const cursor = new Date(today);
     while (true) {
@@ -163,10 +203,16 @@ export const useHealthKit = (): HealthData => {
       }
     }
 
-    // All-time: total number of days ever recorded with >= 10k steps
-    const allTimeDays = [...stepsByDate.values()].filter(
-      (v) => v >= 10000,
-    ).length;
+    const allTimeDays = [...stepsByDate.values()].filter((v) => v >= 10000).length;
+
+    const perms = AppleHealthKit?.Constants?.Permissions;
+    const [walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST] =
+      await Promise.all([
+        getLatestWalkingMetric(perms?.WalkingSpeed),
+        getLatestWalkingMetric(perms?.WalkingStepLength),
+        getLatestWalkingMetric(perms?.WalkingAsymmetryPercentage),
+        getLatestWalkingMetric(perms?.WalkingDoubleSupportPercentage),
+      ]);
 
     setData({
       todaySteps,
@@ -174,13 +220,16 @@ export const useHealthKit = (): HealthData => {
       averageSteps,
       streak,
       allTimeDays,
+      walkingSpeed,
+      walkingStepLength,
+      walkingAsymmetry,
+      walkingDST,
       isAuthorized: true,
       isLoading: false,
     });
   }, []);
 
   useEffect(() => {
-    // If the native module failed to load, show not-authorized immediately.
     if (!AppleHealthKit) {
       console.log('[HealthKit] Native module not available');
       setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
@@ -192,11 +241,9 @@ export const useHealthKit = (): HealthData => {
     let refreshInterval: ReturnType<typeof setInterval>;
     let didRespond = false;
 
-    // Safety net: if HealthKit never calls back (entitlement issue / crash),
-    // show the not-authorized state rather than staying blank forever.
     const timeout = setTimeout(() => {
       if (!didRespond) {
-        console.log('[HealthKit] Timeout — initHealthKit never called back. Likely missing entitlement or provisioning profile issue.');
+        console.log('[HealthKit] Timeout — initHealthKit never called back.');
         setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
       }
     }, 5000);

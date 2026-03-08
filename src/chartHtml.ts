@@ -4416,7 +4416,7 @@ function LivelineTransition({
         pulse: false,
         momentum: false,
         scrub: true,
-        referenceLine: { value: 10000, label: '10k' },
+        referenceLine: { value: 10000, label: '10,000 steps' },
         formatValue: function (v) { return Math.round(v).toLocaleString(); },
         formatTime: function (t) {
           var d = new Date(t * 1000);
