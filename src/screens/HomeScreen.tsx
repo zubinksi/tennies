@@ -90,14 +90,13 @@ const styles = StyleSheet.create({
 
   // Wordmark
   wordmark: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 3,
+    fontSize: 14,
+    fontWeight: '400',
     color: colors.text,
     marginBottom: spacing.xs,
   },
   subheader: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '400',
     color: colors.textMuted,
     marginBottom: spacing.xl,
@@ -152,10 +151,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   metricLabel: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '400',
     color: colors.textMuted,
-    letterSpacing: 1.5,
   },
   divider: {
     width: StyleSheet.hairlineWidth,
