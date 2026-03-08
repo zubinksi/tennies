@@ -124,25 +124,25 @@ export const HomeScreen: React.FC = () => {
       key: 'speed',
       label: 'Walk Speed',
       value: fmtSpeed(walkingSpeed),
-      valueColor: speedColor,
+      valueColor: '#000000',
     },
     {
       key: 'stepLength',
       label: 'Step Length',
       value: fmtLength(walkingStepLength),
-      valueColor: '#FFFFFF',
+      valueColor: '#000000',
     },
     {
       key: 'asymmetry',
       label: 'Asymmetry',
       value: fmtPct(walkingAsymmetry),
-      valueColor: asymmetryColor,
+      valueColor: '#000000',
     },
     {
       key: 'dst',
       label: 'DST',
       value: fmtPct(walkingDST),
-      valueColor: dstColor,
+      valueColor: '#000000',
     },
   ];
 
@@ -204,7 +204,6 @@ export const HomeScreen: React.FC = () => {
             <View style={styles.advancedRow}>
               {advancedMetrics.map((m, i) => (
                 <React.Fragment key={m.key}>
-                  {i > 0 && <View style={styles.advancedDivider} />}
                   <View style={styles.advancedMetric}>
                     <TouchableOpacity
                       onPress={() => toggle(m.key)}
@@ -236,7 +235,7 @@ export const HomeScreen: React.FC = () => {
 
             <View style={styles.gaitRow}>
               <Text style={styles.gaitLabel}>Gait Style: </Text>
-              <Text style={[styles.gaitValue, { color: speedColor }]}>
+              <Text style={[styles.gaitValue, { color: '#000000' }]}>
                 {gaitStyle}
               </Text>
             </View>
@@ -351,11 +350,9 @@ const styles = StyleSheet.create({
   advancedLabelDark: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#AAAAAA',
+    color: '#000000',
   },
-  advancedLabelClickable: {
-    textDecorationLine: 'underline',
-  },
+  advancedLabelClickable: {},
   advancedLabelOpen: {
     color: '#f97316',
   },
@@ -378,13 +375,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingTop: spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#555555',
   },
   gaitLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#AAAAAA',
+    color: '#000000',
   },
   gaitValue: {
     fontSize: 14,
