@@ -20,6 +20,7 @@ export interface HealthData {
   chartData: ChartPoint[];
   averageSteps: number;
   streak: number;
+  allTimeDays: number;
   isAuthorized: boolean;
   isLoading: boolean;
 }
@@ -81,6 +82,7 @@ export const useHealthKit = (): HealthData => {
     chartData: [],
     averageSteps: 0,
     streak: 0,
+    allTimeDays: 0,
     isAuthorized: false,
     isLoading: true,
   });
@@ -119,10 +121,10 @@ export const useHealthKit = (): HealthData => {
 
     const todaySteps = cumulative;
 
-    // Fetch last 30 days for average and streak
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const dailySamples = await getDailyStepSamples(thirtyDaysAgo, now);
+    // Fetch from 2015 onwards for average, streak, and all-time count.
+    // Apple Watch launched in 2015 — this covers all realistic HealthKit history.
+    const epoch = new Date('2015-01-01T00:00:00.000Z');
+    const dailySamples = await getDailyStepSamples(epoch, now);
 
     // Build date → steps map (excluding today, which we already have)
     const stepsByDate = new Map<string, number>();
@@ -132,15 +134,18 @@ export const useHealthKit = (): HealthData => {
     }
     stepsByDate.set(today.toDateString(), todaySteps);
 
-    // Average: mean of completed past days
-    const pastKeys = [...stepsByDate.keys()].filter(
-      (k) => k !== today.toDateString(),
-    );
+    // Average: mean of the last 30 completed past days that have data
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentKeys = [...stepsByDate.keys()].filter((k) => {
+      const d = new Date(k);
+      return k !== today.toDateString() && d >= thirtyDaysAgo;
+    });
     const averageSteps =
-      pastKeys.length > 0
+      recentKeys.length > 0
         ? Math.round(
-            pastKeys.reduce((sum, k) => sum + (stepsByDate.get(k) ?? 0), 0) /
-              pastKeys.length,
+            recentKeys.reduce((sum, k) => sum + (stepsByDate.get(k) ?? 0), 0) /
+              recentKeys.length,
           )
         : 0;
 
@@ -158,11 +163,17 @@ export const useHealthKit = (): HealthData => {
       }
     }
 
+    // All-time: total number of days ever recorded with >= 10k steps
+    const allTimeDays = [...stepsByDate.values()].filter(
+      (v) => v >= 10000,
+    ).length;
+
     setData({
       todaySteps,
       chartData,
       averageSteps,
       streak,
+      allTimeDays,
       isAuthorized: true,
       isLoading: false,
     });

@@ -14,14 +14,15 @@ const formatNumber = (n: number): string =>
   n.toLocaleString('en-US');
 
 export const HomeScreen: React.FC = () => {
-  const { todaySteps, chartData, averageSteps, streak, isLoading, isAuthorized } =
+  const { todaySteps, chartData, averageSteps, streak, allTimeDays, isLoading, isAuthorized } =
     useHealthKit();
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         {/* Wordmark */}
-        <Text style={styles.wordmark}>TENNIES</Text>
+        <Text style={styles.wordmark}>tennies</Text>
+        <Text style={styles.subheader}>be pedestrian. get ten thousand steps a day.</Text>
 
         {/* Chart */}
         <View style={styles.chartWrapper}>
@@ -52,16 +53,21 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.metricsRow}>
           <View style={styles.metric}>
             <Text style={styles.metricNumber}>{formatNumber(averageSteps)}</Text>
-            <Text style={styles.metricLabel}>DAILY AVG</Text>
+            <Text style={styles.metricLabel}>daily avg</Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.metric}>
             <Text style={styles.metricNumber}>{streak}</Text>
-            <Text style={styles.metricLabel}>
-              {streak === 1 ? 'DAY STREAK' : 'DAY STREAK'}
-            </Text>
+            <Text style={styles.metricLabel}>day streak</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.metric}>
+            <Text style={styles.metricNumber}>{formatNumber(allTimeDays)}</Text>
+            <Text style={styles.metricLabel}>all time</Text>
           </View>
         </View>
       </View>
@@ -76,7 +82,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.sm,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
@@ -87,6 +94,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 3,
     color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  subheader: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: colors.textMuted,
     marginBottom: spacing.xl,
   },
 
