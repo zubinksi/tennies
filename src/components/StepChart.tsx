@@ -9,95 +9,223 @@ interface StepChartProps {
   loading: boolean;
 }
 
-// The chart HTML is a self-contained React app using Liveline from esm.sh.
-// It posts CHART_READY once the message listener is set up, then React Native
-// sends data. This avoids the race where onLoad fires before ES modules load.
+// Self-contained canvas chart — no external scripts, no network dependency.
+// Posts CHART_READY once the message listener is set up, then React Native
+// sends STEP_DATA. This avoids the race where onLoad fires before JS runs.
 const CHART_HTML = `<!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #root { width: 100%; height: 100%; }
-    body { background: #F9F9F9; overflow: hidden; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #F9F9F9; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module">
-    import { createElement, useState, useEffect } from 'https://esm.sh/react@18';
-    import { createRoot } from 'https://esm.sh/react-dom@18/client';
-    import Liveline from 'https://esm.sh/liveline';
+  <canvas id="c"></canvas>
+  <script>
+    (function () {
+      var canvas = document.getElementById('c');
+      var ctx = canvas.getContext('2d');
+      var dpr = window.devicePixelRatio || 1;
+      var state = { data: [], value: 0, loading: true };
+      var loadAnim = null;
+      var loadPhase = 0;
 
-    function Chart() {
-      const [chartState, setChartState] = useState({
-        data: [],
-        value: 0,
-        loading: true,
-      });
+      function resize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        draw();
+      }
 
-      useEffect(() => {
-        const handle = (e) => {
-          try {
-            const raw = typeof e.data === 'string' ? e.data : JSON.stringify(e.data);
-            const msg = JSON.parse(raw);
-            if (msg.type === 'STEP_DATA') {
-              setChartState({ data: msg.data, value: msg.value, loading: false });
-            }
-          } catch (_) {}
-        };
-        window.addEventListener('message', handle);
-        document.addEventListener('message', handle);
+      function draw() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+        if (state.loading || state.data.length < 2) {
+          animateLoading(w, h);
+        } else {
+          if (loadAnim) { cancelAnimationFrame(loadAnim); loadAnim = null; }
+          drawChart(w, h);
+        }
+      }
 
-        // Signal React Native that the listener is ready. RN will send data now.
+      function animateLoading(w, h) {
+        if (loadAnim) cancelAnimationFrame(loadAnim);
+        var midY = h * 0.45;
+        loadPhase += 0.04;
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        for (var x = 0; x <= w; x += 2) {
+          var y = midY + Math.sin((x / w) * Math.PI * 5 + loadPhase) * 7;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        loadAnim = requestAnimationFrame(function () { animateLoading(w, h); });
+      }
+
+      function buildLinePath(data, tx, ty) {
+        ctx.beginPath();
+        for (var i = 0; i < data.length; i++) {
+          var x = tx(data[i].time);
+          var y = ty(data[i].value);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+      }
+
+      function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+      }
+
+      function drawChart(w, h) {
+        var data = state.data;
+        var pad = { top: 20, right: 52, bottom: 26, left: 12 };
+        var cw = w - pad.left - pad.right;
+        var ch = h - pad.top - pad.bottom;
+
+        var todayStart = data[0].time;
+        var maxVal = 0;
+        for (var i = 0; i < data.length; i++) if (data[i].value > maxVal) maxVal = data[i].value;
+        maxVal = Math.max(10000, maxVal * 1.15);
+
+        function tx(t) { return pad.left + (t - todayStart) / 86400 * cw; }
+        function ty(v) { return pad.top + ch * (1 - v / maxVal); }
+
+        // Horizontal grid lines
+        ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+        ctx.lineWidth = 1;
+        [0.25, 0.5, 0.75].forEach(function (pct) {
+          var y = ty(maxVal * pct);
+          ctx.beginPath();
+          ctx.moveTo(pad.left, y);
+          ctx.lineTo(pad.left + cw, y);
+          ctx.stroke();
+        });
+
+        // 10k reference line
+        var refY = ty(10000);
+        if (refY > pad.top && refY < pad.top + ch) {
+          ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
+          ctx.beginPath();
+          ctx.moveTo(pad.left, refY);
+          ctx.lineTo(pad.left + cw, refY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(0,0,0,0.30)';
+          ctx.font = '10px -apple-system, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('10k', pad.left + cw + 6, refY);
+        }
+
+        // Fill gradient under the line
+        buildLinePath(data, tx, ty);
+        var last = data[data.length - 1];
+        ctx.lineTo(tx(last.time), pad.top + ch);
+        ctx.lineTo(pad.left, pad.top + ch);
+        ctx.closePath();
+        var grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
+        grad.addColorStop(0, 'rgba(17,17,17,0.10)');
+        grad.addColorStop(1, 'rgba(17,17,17,0.00)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Line stroke
+        buildLinePath(data, tx, ty);
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.setLineDash([]);
+        ctx.stroke();
+
+        // Time labels
+        var nowSec = Math.floor(Date.now() / 1000);
+        ctx.fillStyle = 'rgba(0,0,0,0.28)';
+        ctx.font = '10px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        [{h: 6, l: '6am'}, {h: 12, l: '12pm'}, {h: 18, l: '6pm'}].forEach(function (lb) {
+          var t = todayStart + lb.h * 3600;
+          if (t < nowSec) ctx.fillText(lb.l, tx(t), h - 5);
+        });
+
+        // Tip dot
+        var tipX = tx(last.time);
+        var tipY = ty(last.value);
+        ctx.beginPath();
+        ctx.arc(tipX, tipY, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#111111';
+        ctx.fill();
+
+        // Badge
+        var label = Math.round(state.value).toLocaleString();
+        ctx.font = '600 11px -apple-system, sans-serif';
+        var tw = ctx.measureText(label).width;
+        var bw = tw + 16;
+        var bh = 20;
+        var bx = tipX - bw / 2;
+        bx = Math.max(pad.left, Math.min(bx, pad.left + cw - bw));
+        var by = tipY - bh - 10;
+        if (by < pad.top) by = tipY + 10;
+
+        ctx.fillStyle = 'rgba(17,17,17,0.85)';
+        roundRect(bx, by, bw, bh, 5);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, bx + bw / 2, by + bh / 2);
+      }
+
+      function onMessage(e) {
         try {
-          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'CHART_READY' }));
+          var raw = typeof e.data === 'string' ? e.data : JSON.stringify(e.data);
+          var msg = JSON.parse(raw);
+          if (msg.type === 'STEP_DATA') {
+            state = { data: msg.data, value: msg.value, loading: false };
+            draw();
+          }
         } catch (_) {}
+      }
 
-        return () => {
-          window.removeEventListener('message', handle);
-          document.removeEventListener('message', handle);
-        };
-      }, []);
+      window.addEventListener('message', onMessage);
+      document.addEventListener('message', onMessage);
+      window.addEventListener('resize', resize);
+      resize();
 
-      return createElement(
-        'div',
-        { style: { width: '100%', height: '100%' } },
-        createElement(Liveline, {
-          data: chartState.data,
-          value: chartState.value,
-          loading: chartState.loading,
-          theme: 'light',
-          color: '#111111',
-          window: 86400,
-          grid: true,
-          fill: true,
-          badge: true,
-          badgeVariant: 'minimal',
-          pulse: false,
-          momentum: false,
-          scrub: true,
-          referenceLine: { value: 10000, label: '10k' },
-          formatValue: (v) => Math.round(v).toLocaleString(),
-          formatTime: (t) => {
-            const d = new Date(t * 1000);
-            const h = d.getHours();
-            const ampm = h >= 12 ? 'pm' : 'am';
-            return (h % 12 || 12) + ampm;
-          },
-          style: { width: '100%', height: '100%' },
-        }),
-      );
-    }
-
-    createRoot(document.getElementById('root')).render(createElement(Chart));
+      try {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'CHART_READY' }));
+      } catch (_) {}
+    })();
   </script>
 </body>
 </html>`;
 
 export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) => {
   const webViewRef = useRef<WebView>(null);
-  // Keep latest data in a ref so we can send it whenever the chart is ready
   const pendingRef = useRef<{ data: ChartPoint[]; value: number } | null>(null);
   const isChartReadyRef = useRef(false);
 
@@ -113,7 +241,6 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) =>
     `);
   }, []);
 
-  // Cache the latest data; send it immediately if chart is already ready
   useEffect(() => {
     pendingRef.current = { data, value };
     if (isChartReadyRef.current) {
@@ -126,7 +253,6 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) =>
       const msg = JSON.parse(e.nativeEvent.data);
       if (msg.type === 'CHART_READY') {
         isChartReadyRef.current = true;
-        // Send whatever data we have at this point
         if (pendingRef.current) {
           sendData(pendingRef.current.data, pendingRef.current.value);
         }
@@ -138,12 +264,11 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, loading }) =>
     <View style={styles.container}>
       <WebView
         ref={webViewRef}
-        source={{ html: CHART_HTML, baseUrl: 'https://esm.sh' }}
+        source={{ html: CHART_HTML }}
         style={styles.webView}
         javaScriptEnabled
         scrollEnabled={false}
         originWhitelist={['*']}
-        allowsInlineMediaPlayback={false}
         onMessage={handleMessage}
       />
     </View>
