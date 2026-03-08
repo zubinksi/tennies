@@ -66,85 +66,7 @@ export const HomeScreen: React.FC = () => {
 
   const ready = !isLoading && isAuthorized;
 
-  // Conditional colors
   const streakColor = ready && streak > 0 ? '#599a59' : colors.text;
-
-  const speedColor =
-    speedMph == null
-      ? '#FFFFFF'
-      : speedMph >= 2
-      ? '#599a59'
-      : speedMph >= 1
-      ? '#86EFAC'
-      : '#FDE047';
-
-  const asymmetryColor =
-    walkingAsymmetry == null
-      ? '#FFFFFF'
-      : walkingAsymmetry < 0.05
-      ? '#599a59'
-      : '#f97316';
-
-  const dstColor =
-    walkingDST == null
-      ? '#FFFFFF'
-      : walkingDST >= 0.20 && walkingDST <= 0.40
-      ? '#599a59'
-      : '#f97316';
-
-  const statsMetrics = [
-    {
-      key: 'tennyProgress',
-      label: ["Today's", 'Steps'],
-      value: ready ? formatNumber(todaySteps) : '--',
-      valueColor: colors.text,
-    },
-    {
-      key: 'avg',
-      label: ['30D', 'Avg'],
-      value: ready ? formatNumber(averageSteps) : '--',
-      valueColor: colors.text,
-    },
-    {
-      key: 'streak',
-      label: ['10K', 'Streak'],
-      value: ready ? String(streak) : '--',
-      valueColor: streakColor,
-    },
-    {
-      key: 'allTime',
-      label: ['All-time', '10Ks'],
-      value: ready ? formatNumber(allTimeDays) : '--',
-      valueColor: colors.text,
-    },
-  ];
-
-  const advancedMetrics = [
-    {
-      key: 'speed',
-      label: 'Walk Speed',
-      value: fmtSpeed(walkingSpeed),
-      valueColor: '#000000',
-    },
-    {
-      key: 'stepLength',
-      label: 'Step Length',
-      value: fmtLength(walkingStepLength),
-      valueColor: '#000000',
-    },
-    {
-      key: 'asymmetry',
-      label: 'Asymmetry',
-      value: fmtPct(walkingAsymmetry),
-      valueColor: '#000000',
-    },
-    {
-      key: 'dst',
-      label: 'DST',
-      value: fmtPct(walkingDST),
-      valueColor: '#000000',
-    },
-  ];
 
   const handleShare = async () => {
     const steps = ready ? formatNumber(todaySteps) : '0';
@@ -164,7 +86,38 @@ export const HomeScreen: React.FC = () => {
       >
         {/* Wordmark */}
         <Text style={styles.wordmark}>TENNIES</Text>
-        <Text style={styles.subheader}>Pedestrian Performance Monitoring</Text>
+
+        {/* Highlights Section */}
+        <View style={styles.metricsSection}>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBold}>Today's Steps</Text>
+            <Text style={styles.highlightBold}>
+              {ready ? formatNumber(todaySteps) : '--'}
+            </Text>
+          </View>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightNormal}>30D avg</Text>
+            <Text style={styles.highlightNormal}>
+              {ready ? formatNumber(averageSteps) : '--'}
+            </Text>
+          </View>
+
+          <View style={styles.highlightBreak} />
+
+          <Text style={styles.highlightGroupLabel}>Hit 10,000 Daily Steps</Text>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBold}>Current streak</Text>
+            <Text style={[styles.highlightBold, { color: streakColor }]}>
+              {ready ? String(streak) : '--'}
+            </Text>
+          </View>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightNormal}>All Time</Text>
+            <Text style={styles.highlightNormal}>
+              {ready ? formatNumber(allTimeDays) : '--'}
+            </Text>
+          </View>
+        </View>
 
         {/* Chart */}
         <View style={styles.chartWrapper}>
@@ -178,67 +131,97 @@ export const HomeScreen: React.FC = () => {
           </Text>
         )}
 
-        {/* Highlights Section */}
-        <View style={styles.metricsSection}>
-          <Text style={styles.sectionTitle}>Highlights</Text>
-          <View style={styles.statsRow}>
-            {statsMetrics.map((m, i) => (
-              <React.Fragment key={m.key}>
-                {i > 0 && <View style={styles.statsDivider} />}
-                <View style={styles.advancedMetric}>
-                  <Text style={styles.advancedLabel}>{m.label[0]}</Text>
-                  <Text style={styles.advancedLabel}>{m.label[1]}</Text>
-                  <Text style={[styles.advancedValue, { color: m.valueColor }]}>
-                    {m.value}
-                  </Text>
-                </View>
-              </React.Fragment>
-            ))}
-          </View>
-        </View>
-
         {/* Advanced Metrics */}
         <View style={styles.advancedSection}>
-          <Text style={styles.sectionTitle}>Advanced Stride Analysis</Text>
+          <Text style={styles.sectionTitle}>Advanced Metrics</Text>
           <View style={styles.advancedCard}>
-            <View style={styles.advancedRow}>
-              {advancedMetrics.map((m, i) => (
-                <React.Fragment key={m.key}>
-                  <View style={styles.advancedMetric}>
-                    <TouchableOpacity
-                      onPress={() => toggle(m.key)}
-                      hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-                    >
-                      <Text
-                        style={[
-                          styles.advancedLabelDark,
-                          styles.advancedLabelClickable,
-                          openTooltip === m.key && styles.advancedLabelOpen,
-                        ]}
-                      >
-                        {m.label}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.advancedValue, { color: m.valueColor }]}>
-                      {m.value}
-                    </Text>
-                  </View>
-                </React.Fragment>
-              ))}
+            {/* Gait Style */}
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Gait Style</Text>
+              <Text style={[styles.tableValue, { color: '#599a59' }]}>
+                {gaitStyle}
+              </Text>
             </View>
 
-            {openTooltip && (
+            {/* Walk Speed */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('speed')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text
+                  style={[
+                    styles.tableLabel,
+                    openTooltip === 'speed' && styles.labelOpen,
+                  ]}
+                >
+                  Walk Speed
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.tableValue}>{fmtSpeed(walkingSpeed)}</Text>
+            </View>
+
+            {/* Step Length */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('stepLength')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text
+                  style={[
+                    styles.tableLabel,
+                    openTooltip === 'stepLength' && styles.labelOpen,
+                  ]}
+                >
+                  Step Length
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.tableValue}>
+                {fmtLength(walkingStepLength)}
+              </Text>
+            </View>
+
+            {/* Asymmetry */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('asymmetry')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text
+                  style={[
+                    styles.tableLabel,
+                    openTooltip === 'asymmetry' && styles.labelOpen,
+                  ]}
+                >
+                  Asymmetry
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.tableValue}>{fmtPct(walkingAsymmetry)}</Text>
+            </View>
+
+            {/* DST */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('dst')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text
+                  style={[
+                    styles.tableLabel,
+                    openTooltip === 'dst' && styles.labelOpen,
+                  ]}
+                >
+                  DST
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.tableValue}>{fmtPct(walkingDST)}</Text>
+            </View>
+
+            {openTooltip && TOOLTIPS[openTooltip] && (
               <View style={styles.tooltipBox}>
                 <Text style={styles.tooltipText}>{TOOLTIPS[openTooltip]}</Text>
               </View>
             )}
-
-            <View style={styles.gaitRow}>
-              <Text style={styles.gaitLabel}>Gait Style: </Text>
-              <Text style={[styles.gaitValue, { color: '#599a59' }]}>
-                {gaitStyle}
-              </Text>
-            </View>
           </View>
         </View>
 
@@ -269,13 +252,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'Menlo',
     color: colors.text,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
   },
-  subheader: {
-    fontSize: 14,
+
+  // Highlights
+  metricsSection: {
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+    paddingRight: spacing.lg,
+  },
+  highlightRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  highlightBold: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  highlightNormal: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: colors.text,
+  },
+  highlightBreak: {
+    height: spacing.md,
+  },
+  highlightGroupLabel: {
+    fontSize: 12,
     fontWeight: '400',
     color: colors.textMuted,
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
   },
 
   // Chart
@@ -290,76 +297,41 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
 
-  // Highlights section
-  metricsSection: {
-    gap: spacing.sm,
-    paddingVertical: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-    marginBottom: spacing.lg,
-    paddingRight: spacing.lg,
-  },
+  // Advanced Metrics
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
   },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  statsDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 36,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.sm,
-    alignSelf: 'center',
-  },
-
-  // Advanced Metrics
   advancedSection: {
     gap: spacing.sm,
     marginBottom: spacing.lg,
     paddingRight: spacing.lg,
   },
   advancedCard: {
-    gap: spacing.md,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: 15,
+    padding: spacing.md,
+    gap: spacing.sm,
   },
-  advancedRow: {
+  tableRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  advancedMetric: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  advancedDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 36,
-    backgroundColor: '#555555',
-    marginHorizontal: spacing.sm,
-    alignSelf: 'center',
-  },
-  advancedLabel: {
-    fontSize: 12,
-    fontWeight: '500',
+  tableLabel: {
+    fontSize: 14,
+    fontWeight: '400',
     color: colors.textMuted,
   },
-  advancedLabelDark: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.textMuted,
-  },
-  advancedLabelClickable: {},
-  advancedLabelOpen: {
-    color: '#f97316',
-  },
-  advancedValue: {
-    fontSize: 18,
+  tableValue: {
+    fontSize: 14,
     fontWeight: '600',
-    letterSpacing: -0.3,
+    color: colors.text,
+  },
+  labelOpen: {
+    color: '#f97316',
   },
   tooltipBox: {
     backgroundColor: '#2A2A2A',
@@ -370,20 +342,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#AAAAAA',
     lineHeight: 19,
-  },
-  gaitRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: spacing.xs,
-  },
-  gaitLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000000',
-  },
-  gaitValue: {
-    fontSize: 14,
-    fontWeight: '600',
   },
 
   // Share button
