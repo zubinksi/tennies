@@ -1,0 +1,105 @@
+diff --git a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Methods_Fitness.m b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Methods_Fitness.m
+index a83a441..968fedb 100644
+--- a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Methods_Fitness.m
++++ b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Methods_Fitness.m
+@@ -81,6 +81,12 @@
+ 
+     if ([type isEqual:@"Running"] || [type isEqual:@"Cycling"]) {
+         unit = [HKUnit mileUnit];
++    } else if ([type isEqual:@"WalkingSpeed"]) {
++        unit = [[HKUnit meterUnit] unitDividedByUnit:[HKUnit secondUnit]];
++    } else if ([type isEqual:@"WalkingStepLength"]) {
++        unit = [HKUnit meterUnit];
++    } else if ([type isEqual:@"WalkingAsymmetryPercentage"] || [type isEqual:@"WalkingDoubleSupportPercentage"]) {
++        unit = [HKUnit percentUnit];
+     }
+ 
+     [self fetchSamplesOfType:samplesType
+diff --git a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+TypesAndPermissions.m b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+TypesAndPermissions.m
+index 287399f..f0bc168 100644
+--- a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+TypesAndPermissions.m
++++ b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+TypesAndPermissions.m
+@@ -107,6 +107,30 @@
+         } else {
+             return nil;
+         }
++    } else if ([@"WalkingSpeed" isEqualToString:key]) {
++        if (@available(iOS 14.0, *)) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingSpeed];
++        } else {
++            return nil;
++        }
++    } else if ([@"WalkingStepLength" isEqualToString:key]) {
++        if (@available(iOS 14.0, *)) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingStepLength];
++        } else {
++            return nil;
++        }
++    } else if ([@"WalkingAsymmetryPercentage" isEqualToString:key]) {
++        if (@available(iOS 14.0, *)) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingAsymmetryPercentage];
++        } else {
++            return nil;
++        }
++    } else if ([@"WalkingDoubleSupportPercentage" isEqualToString:key]) {
++        if (@available(iOS 14.0, *)) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingDoubleSupportPercentage];
++        } else {
++            return nil;
++        }
+     }
+ 
+     // Nutrition Identifiers
+diff --git a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Utils.m b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Utils.m
+index 307056d..28d3b89 100644
+--- a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Utils.m
++++ b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit+Utils.m
+@@ -226,6 +226,18 @@ NSString * const kMetadataKey = @"metadata";
+         return [HKObjectType workoutType];
+     }
+ 
++    if (@available(iOS 14.0, *)) {
++        if ([type isEqual:@"WalkingSpeed"]) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingSpeed];
++        } else if ([type isEqual:@"WalkingStepLength"]) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingStepLength];
++        } else if ([type isEqual:@"WalkingAsymmetryPercentage"]) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingAsymmetryPercentage];
++        } else if ([type isEqual:@"WalkingDoubleSupportPercentage"]) {
++            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierWalkingDoubleSupportPercentage];
++        }
++    }
++
+     return [HKObjectType workoutType];
+ }
+ 
+diff --git a/node_modules/react-native-health/index.d.ts b/node_modules/react-native-health/index.d.ts
+index 0cf0e28..ba53ed0 100644
+--- a/node_modules/react-native-health/index.d.ts
++++ b/node_modules/react-native-health/index.d.ts
+@@ -804,6 +804,10 @@ declare module 'react-native-health' {
+     Vo2Max = 'Vo2Max',
+     WaistCircumference = 'WaistCircumference',
+     WalkingHeartRateAverage = 'WalkingHeartRateAverage',
++    WalkingSpeed = 'WalkingSpeed',
++    WalkingStepLength = 'WalkingStepLength',
++    WalkingAsymmetryPercentage = 'WalkingAsymmetryPercentage',
++    WalkingDoubleSupportPercentage = 'WalkingDoubleSupportPercentage',
+     Weight = 'Weight',
+     Workout = 'Workout',
+     WorkoutRoute = 'WorkoutRoute',
+diff --git a/node_modules/react-native-health/src/constants/Permissions.js b/node_modules/react-native-health/src/constants/Permissions.js
+index 521fa61..1c1fe80 100644
+--- a/node_modules/react-native-health/src/constants/Permissions.js
++++ b/node_modules/react-native-health/src/constants/Permissions.js
+@@ -91,6 +91,10 @@ export const Permissions = {
+   Vo2Max: 'Vo2Max',
+   WaistCircumference: 'WaistCircumference',
+   WalkingHeartRateAverage: 'WalkingHeartRateAverage',
++  WalkingSpeed: 'WalkingSpeed',
++  WalkingStepLength: 'WalkingStepLength',
++  WalkingAsymmetryPercentage: 'WalkingAsymmetryPercentage',
++  WalkingDoubleSupportPercentage: 'WalkingDoubleSupportPercentage',
+   Weight: 'Weight',
+   Workout: 'Workout',
+   WorkoutRoute: 'WorkoutRoute',
