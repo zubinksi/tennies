@@ -8,6 +8,142 @@ export const CHART_HTML = `<!DOCTYPE html>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body, #root { width: 100%; height: 100%; }
     body { background: #EBEBEB; overflow: hidden; }
+    /* src/styles/Stepper.css */
+.pasito-container {
+  --pill-dot-size: 8px;
+  --pill-active-width: 24px;
+  --pill-gap: 6px;
+  --pill-duration: 500ms;
+  --pill-easing: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --pill-bg: rgba(0, 0, 0, 0.12);
+  --pill-active-bg: rgba(0, 0, 0, 0.8);
+  --pill-fill-bg: rgba(255, 255, 255, 0.45);
+  --pill-container-bg: rgba(0, 0, 0, 0.04);
+  --pill-container-radius: 999px;
+  --pill-container-border: rgba(0, 0, 0, 0.06);
+  display: inline-flex;
+  padding: 6px 10px;
+  background: var(--pill-container-bg);
+  border-radius: var(--pill-container-radius);
+  border: 1px solid var(--pill-container-border);
+  overflow: hidden;
+}
+.pasito-track {
+  display: flex;
+  align-items: center;
+  margin-left: calc(-1 * var(--pill-gap));
+  transition: transform var(--pill-duration) var(--pill-easing);
+}
+.pasito-vertical .pasito-track {
+  flex-direction: column;
+  margin-left: 0;
+  margin-top: calc(-1 * var(--pill-gap));
+}
+.pasito-step {
+  position: relative;
+  width: var(--pill-dot-size);
+  height: var(--pill-dot-size);
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: var(--pill-bg);
+  flex-shrink: 0;
+  overflow: hidden;
+  margin-left: var(--pill-gap);
+  margin-top: 0;
+  transform-origin: center center;
+  transition:
+    width var(--pill-duration) var(--pill-easing),
+    height var(--pill-duration) var(--pill-easing),
+    background var(--pill-duration) var(--pill-easing),
+    opacity var(--pill-duration) var(--pill-easing),
+    transform var(--pill-duration) var(--pill-easing),
+    margin-left var(--pill-duration) var(--pill-easing),
+    margin-top var(--pill-duration) var(--pill-easing);
+}
+.pasito-vertical .pasito-step {
+  margin-left: 0;
+  margin-top: var(--pill-gap);
+}
+.pasito-step:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.3);
+  outline-offset: 2px;
+}
+.pasito-step-active {
+  width: var(--pill-active-width);
+  background: var(--pill-active-bg);
+}
+.pasito-vertical .pasito-step-active {
+  width: var(--pill-dot-size);
+  height: var(--pill-active-width);
+}
+.pasito-step::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--pill-fill-bg);
+  pointer-events: none;
+}
+.pasito-vertical .pasito-step::after {
+  right: 0;
+  bottom: auto;
+  width: auto;
+  height: 0;
+}
+.pasito-step-filling::after {
+  width: 100%;
+  transition: width var(--pill-fill-duration, 3000ms) linear;
+}
+.pasito-vertical .pasito-step-filling::after {
+  width: auto;
+  height: 100%;
+  transition: height var(--pill-fill-duration, 3000ms) linear;
+}
+.pasito-entering {
+  width: 0;
+  margin-left: 0;
+  margin-top: 0;
+  opacity: 0;
+  transform: scale(0);
+  transition-duration: 250ms;
+}
+.pasito-vertical .pasito-entering {
+  width: var(--pill-dot-size);
+  height: 0;
+}
+.pasito-exiting {
+  width: 0;
+  margin-left: 0;
+  margin-top: 0;
+  opacity: 0;
+  transform: scale(0);
+  transition-duration: 250ms;
+}
+.pasito-vertical .pasito-exiting {
+  width: var(--pill-dot-size);
+  height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pasito-step,
+  .pasito-track {
+    transition-duration: 0ms !important;
+  }
+  .pasito-step-filling::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+    .tennies-stepper {
+      --pill-active-bg: rgba(0, 0, 0, 0.7);
+      --pill-bg: rgba(0, 0, 0, 0.18);
+      --pill-container-bg: rgba(0, 0, 0, 0.05);
+      --pill-container-border: rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -318,8 +454,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function require(id) {
     if (id === 'react') return window.React;
     if (id === 'react/jsx-runtime') {
-      // jsx-runtime passes key as a third arg; merge it into props before
-      // forwarding to React.createElement which accepts props.key.
       function jsxFn(type, props, key) {
         if (key !== undefined) props = Object.assign({}, props, { key: key });
         return window.React.createElement(type, props);
@@ -4365,14 +4499,382 @@ function LivelineTransition({
   window.Liveline = module.exports.Liveline;
 })();</script>
   <script>(function () {
+  var module = { exports: {} };
+  var exports = module.exports;
+  function require(id) {
+    if (id === 'react') return window.React;
+    if (id === 'react/jsx-runtime') {
+      function jsxFn(type, props, key) {
+        if (key !== undefined) props = Object.assign({}, props, { key: key });
+        return window.React.createElement(type, props);
+      }
+      return { jsx: jsxFn, jsxs: jsxFn, Fragment: window.React.Fragment };
+    }
+    throw new Error('require: unknown module ' + id);
+  }
+  "use client";
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/react/index.ts
+var react_exports = {};
+__export(react_exports, {
+  Stepper: () => Stepper,
+  useAutoPlay: () => useAutoPlay
+});
+module.exports = __toCommonJS(react_exports);
+
+// src/react/hooks/useStepWindow.ts
+var import_react = require("react");
+
+// src/core/computeStepWindow.ts
+var DOT_SIZE = 8;
+var ACTIVE_WIDTH = 24;
+var GAP = 6;
+var SLOT_SIZE = DOT_SIZE + GAP;
+function computeStepWindow(count, active, maxVisible, orientation) {
+  if (maxVisible == null || count <= maxVisible) {
+    return {
+      windowStart: 0,
+      transformValue: "none",
+      containerSize: void 0
+    };
+  }
+  const half = Math.floor(maxVisible / 2);
+  const windowStart = Math.max(0, Math.min(active - half, count - maxVisible));
+  const offset = windowStart * SLOT_SIZE;
+  const axis = orientation === "vertical" ? "Y" : "X";
+  const transformValue = \`translate\${axis}(-\${offset}px)\`;
+  const size = (maxVisible - 1) * DOT_SIZE + ACTIVE_WIDTH + (maxVisible - 1) * GAP;
+  return { windowStart, transformValue, containerSize: size };
+}
+
+// src/react/hooks/useStepWindow.ts
+function useStepWindow(count, active, maxVisible, orientation) {
+  return (0, import_react.useMemo)(
+    () => computeStepWindow(count, active, maxVisible, orientation),
+    [count, active, maxVisible, orientation]
+  );
+}
+
+// src/react/hooks/useAnimatingSteps.ts
+var import_react2 = require("react");
+
+// src/core/StepAnimator.ts
+var StepAnimator = class {
+  constructor(count) {
+    this.keyGen = count;
+    this.steps = Array.from({ length: count }, (_, i) => ({
+      key: i,
+      index: i,
+      phase: "stable"
+    }));
+  }
+  reconcile(newCount) {
+    const liveCount = this.steps.filter((s) => s.phase !== "exiting").length;
+    if (liveCount === newCount) {
+      return {
+        hasEntering: this.steps.some((s) => s.phase === "entering"),
+        exitingCount: this.steps.filter((s) => s.phase === "exiting").length
+      };
+    }
+    if (newCount < liveCount) {
+      let seen = 0;
+      this.steps = this.steps.map((s) => {
+        if (s.phase === "exiting") return s;
+        seen++;
+        if (seen > newCount) return { ...s, phase: "exiting" };
+        return s;
+      });
+    }
+    if (newCount > liveCount) {
+      for (let i = liveCount; i < newCount; i++) {
+        this.keyGen++;
+        this.steps.push({
+          key: this.keyGen,
+          index: i,
+          phase: "entering"
+        });
+      }
+    }
+    let idx = 0;
+    this.steps = this.steps.map(
+      (s) => s.phase === "exiting" ? s : { ...s, index: idx++ }
+    );
+    return {
+      hasEntering: this.steps.some((s) => s.phase === "entering"),
+      exitingCount: this.steps.filter((s) => s.phase === "exiting").length
+    };
+  }
+  promoteEntering() {
+    this.steps = this.steps.map(
+      (s) => s.phase === "entering" ? { ...s, phase: "stable" } : s
+    );
+  }
+  removeExiting() {
+    this.steps = this.steps.filter((s) => s.phase !== "exiting");
+  }
+  getSteps() {
+    return [...this.steps];
+  }
+};
+
+// src/react/hooks/useAnimatingSteps.ts
+function useAnimatingSteps(count, _duration) {
+  const animatorRef = (0, import_react2.useRef)(null);
+  if (animatorRef.current === null) {
+    animatorRef.current = new StepAnimator(count);
+  }
+  const animator = animatorRef.current;
+  const [steps, setSteps] = (0, import_react2.useState)(() => animator.getSteps());
+  (0, import_react2.useLayoutEffect)(() => {
+    animator.reconcile(count);
+    setSteps(animator.getSteps());
+  }, [count, animator]);
+  const hasEntering = steps.some((s) => s.phase === "entering");
+  (0, import_react2.useEffect)(() => {
+    if (!hasEntering) return;
+    let raf1;
+    let raf2;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        animator.promoteEntering();
+        setSteps(animator.getSteps());
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [hasEntering, animator]);
+  const exitingCount = steps.filter((s) => s.phase === "exiting").length;
+  (0, import_react2.useEffect)(() => {
+    if (exitingCount === 0) return;
+    const timer = setTimeout(() => {
+      animator.removeExiting();
+      setSteps(animator.getSteps());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [exitingCount, animator]);
+  return steps;
+}
+
+// src/react/Step.tsx
+var import_jsx_runtime = require("react/jsx-runtime");
+function Step({
+  index,
+  isActive,
+  phase,
+  transitionDuration,
+  filling,
+  fillDuration,
+  onClick
+}) {
+  const classNames = [
+    "pasito-step",
+    isActive && "pasito-step-active",
+    isActive && filling && "pasito-step-filling",
+    phase === "entering" && "pasito-entering",
+    phase === "exiting" && "pasito-exiting"
+  ].filter(Boolean).join(" ");
+  const style = {
+    "--pill-duration": \`\${transitionDuration}ms\`
+  };
+  if (isActive && filling && fillDuration) {
+    style["--pill-fill-duration"] = \`\${fillDuration}ms\`;
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    "button",
+    {
+      className: classNames,
+      style,
+      onClick,
+      role: "tab",
+      "aria-selected": isActive,
+      "aria-label": \`Step \${index + 1}\`,
+      tabIndex: isActive ? 0 : -1
+    }
+  );
+}
+
+// src/react/Stepper.tsx
+var import_jsx_runtime2 = require("react/jsx-runtime");
+function Stepper({
+  count,
+  active,
+  onStepClick,
+  orientation = "horizontal",
+  maxVisible,
+  transitionDuration = 500,
+  easing,
+  className,
+  filling,
+  fillDuration
+}) {
+  const { transformValue, containerSize } = useStepWindow(
+    count,
+    active,
+    maxVisible,
+    orientation
+  );
+  const animatingSteps = useAnimatingSteps(count, transitionDuration);
+  const containerClass = [
+    "pasito-container",
+    orientation === "vertical" && "pasito-vertical",
+    className
+  ].filter(Boolean).join(" ");
+  const sizeStyle = {};
+  if (containerSize != null) {
+    if (orientation === "vertical") {
+      sizeStyle.height = containerSize;
+    } else {
+      sizeStyle.width = containerSize;
+    }
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+    "div",
+    {
+      className: containerClass,
+      role: "tablist",
+      "aria-label": "Progress steps",
+      style: {
+        "--pill-duration": \`\${transitionDuration}ms\`,
+        ...easing && { "--pill-easing": easing },
+        ...sizeStyle
+      },
+      children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+        "div",
+        {
+          className: "pasito-track",
+          style: { transform: transformValue },
+          children: animatingSteps.map((step) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+            Step,
+            {
+              index: step.index,
+              isActive: step.index === active,
+              phase: step.phase,
+              transitionDuration,
+              filling: step.index === active && filling,
+              fillDuration,
+              onClick: onStepClick ? () => onStepClick(step.index) : void 0
+            },
+            step.key
+          ))
+        }
+      )
+    }
+  );
+}
+
+// src/react/hooks/useAutoPlay.ts
+var import_react3 = require("react");
+
+// src/core/AutoPlayController.ts
+var AutoPlayController = class {
+  constructor({ stepDuration = 3e3, loop = true } = {}) {
+    this.stepDuration = stepDuration;
+    this.loop = loop;
+  }
+  computeNext(active, count) {
+    return active < count - 1 ? active + 1 : this.loop ? 0 : null;
+  }
+};
+
+// src/react/hooks/useAutoPlay.ts
+function useAutoPlay({
+  count,
+  active,
+  onStepChange,
+  stepDuration = 3e3,
+  loop = true,
+  enabled = true
+}) {
+  const [playing, setPlaying] = (0, import_react3.useState)(false);
+  const timerRef = (0, import_react3.useRef)(null);
+  const controllerRef = (0, import_react3.useRef)(null);
+  if (!controllerRef.current) {
+    controllerRef.current = new AutoPlayController({ stepDuration, loop });
+  }
+  controllerRef.current.stepDuration = stepDuration;
+  controllerRef.current.loop = loop;
+  const clearTimer = (0, import_react3.useCallback)(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+  const toggle = (0, import_react3.useCallback)(() => setPlaying((p) => !p), []);
+  (0, import_react3.useEffect)(() => {
+    if (!enabled) {
+      setPlaying(false);
+      clearTimer();
+    }
+  }, [enabled, clearTimer]);
+  (0, import_react3.useEffect)(() => {
+    if (!playing || !enabled) {
+      clearTimer();
+      return;
+    }
+    timerRef.current = setTimeout(() => {
+      const nextStep = controllerRef.current.computeNext(active, count);
+      if (nextStep !== null) {
+        onStepChange(nextStep);
+      } else {
+        setPlaying(false);
+      }
+    }, stepDuration);
+    return clearTimer;
+  }, [playing, enabled, active, count, stepDuration, loop, onStepChange, clearTimer]);
+  const isActive = playing && enabled;
+  return {
+    playing: isActive,
+    toggle,
+    filling: isActive,
+    fillDuration: stepDuration
+  };
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  Stepper,
+  useAutoPlay
+});
+
+  window.PasitoStepper = module.exports.Stepper;
+})();</script>
+  <script>(function () {
   var React = window.React;
   var ReactDOM = window.ReactDOM;
   var Liveline = window.Liveline;
+  var Stepper = window.PasitoStepper;
 
-  function Chart() {
-    var state = React.useState({ data: [], value: 0, loading: true, window: 86400 });
-    var chartState = state[0];
-    var setChartState = state[1];
+  function App() {
+    var activeState = React.useState(0);
+    var active = activeState[0];
+    var setActive = activeState[1];
+
+    var todayState = React.useState({ data: [], value: 0, loading: true, window: 86400 });
+    var todayChart = todayState[0];
+    var setTodayChart = todayState[1];
+
+    var monthlyState = React.useState({ data: [], value: 0, loading: true, window: 365 * 24 * 3600 });
+    var monthlyChart = monthlyState[0];
+    var setMonthlyChart = monthlyState[1];
 
     React.useEffect(function () {
       function handle(e) {
@@ -4380,11 +4882,16 @@ function LivelineTransition({
           var raw = typeof e.data === 'string' ? e.data : JSON.stringify(e.data);
           var msg = JSON.parse(raw);
           if (msg.type === 'STEP_DATA') {
-            // Compute window from data span (midnight → now) so the chart
-            // always fills its x-axis with exactly today's data.
             var d = msg.data;
             var w = d.length > 1 ? (d[d.length - 1].time - d[0].time + 60) : 86400;
-            setChartState({ data: d, value: msg.value, loading: false, window: w });
+            setTodayChart({ data: d, value: msg.value, loading: false, window: w });
+          } else if (msg.type === 'MONTHLY_DATA') {
+            var md = msg.data;
+            var mv = md.length > 0 ? md[md.length - 1].value : 0;
+            var mw = md.length > 1
+              ? (md[md.length - 1].time - md[0].time + 30 * 24 * 3600)
+              : 365 * 24 * 3600;
+            setMonthlyChart({ data: md, value: mv, loading: false, window: mw });
           }
         } catch (_) {}
       }
@@ -4399,37 +4906,95 @@ function LivelineTransition({
       };
     }, []);
 
+    var absChart = { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 };
+
     return React.createElement(
       'div',
-      { style: { width: '100%', height: '100%' } },
-      React.createElement(Liveline, {
-        data: chartState.data,
-        value: chartState.value,
-        loading: chartState.loading,
-        theme: 'light',
-        color: '#FFB700',
-        window: chartState.window,
-        grid: true,
-        fill: true,
-        badge: true,
-        badgeVariant: 'minimal',
-        pulse: false,
-        momentum: false,
-        scrub: true,
-        referenceLine: { value: 10000, label: 'Reach 10K Daily Steps' },
-        formatValue: function (v) { return Math.round(v).toLocaleString(); },
-        formatTime: function (t) {
-          var d = new Date(t * 1000);
-          var h = d.getHours();
-          var ampm = h >= 12 ? 'pm' : 'am';
-          return (h % 12 || 12) + ampm;
-        },
-        style: { width: '100%', height: '100%' },
-      })
+      { style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column' } },
+
+      // Chart area — both charts stacked, only active one visible
+      React.createElement(
+        'div',
+        { style: { flex: 1, position: 'relative' } },
+
+        React.createElement(
+          'div',
+          { style: Object.assign({}, absChart, {
+              opacity: active === 0 ? 1 : 0,
+              pointerEvents: active === 0 ? 'auto' : 'none',
+            }) },
+          React.createElement(Liveline, {
+            data: todayChart.data,
+            value: todayChart.value,
+            loading: todayChart.loading,
+            theme: 'light',
+            color: '#FFB700',
+            window: todayChart.window,
+            grid: true,
+            fill: true,
+            badge: true,
+            badgeVariant: 'minimal',
+            pulse: false,
+            momentum: false,
+            scrub: true,
+            referenceLine: { value: 10000, label: 'Reach 10K Daily Steps' },
+            formatValue: function (v) { return Math.round(v).toLocaleString(); },
+            formatTime: function (t) {
+              var d = new Date(t * 1000);
+              var h = d.getHours();
+              var ampm = h >= 12 ? 'pm' : 'am';
+              return (h % 12 || 12) + ampm;
+            },
+            style: { width: '100%', height: '100%' },
+          })
+        ),
+
+        React.createElement(
+          'div',
+          { style: Object.assign({}, absChart, {
+              opacity: active === 1 ? 1 : 0,
+              pointerEvents: active === 1 ? 'auto' : 'none',
+            }) },
+          React.createElement(Liveline, {
+            data: monthlyChart.data,
+            value: monthlyChart.value,
+            loading: monthlyChart.loading,
+            theme: 'light',
+            color: '#FFB700',
+            window: monthlyChart.window,
+            grid: true,
+            fill: true,
+            badge: true,
+            badgeVariant: 'minimal',
+            pulse: false,
+            momentum: false,
+            scrub: true,
+            formatValue: function (v) { return Math.round(v).toLocaleString() + ' avg'; },
+            formatTime: function (t) {
+              var d = new Date(t * 1000);
+              return d.toLocaleString('en-US', { month: 'short' });
+            },
+            style: { width: '100%', height: '100%' },
+          })
+        )
+      ),
+
+      // Pasito stepper
+      React.createElement(
+        'div',
+        { style: { display: 'flex', justifyContent: 'center', paddingBottom: '10px' } },
+        React.createElement(Stepper, {
+          count: 2,
+          active: active,
+          onStepClick: setActive,
+          transitionDuration: 400,
+          className: 'tennies-stepper',
+        })
+      )
     );
   }
 
-  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Chart));
+  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 })();</script>
 </body>
 </html>`;

@@ -27,27 +27,26 @@ const TOOLTIPS: Record<string, string> = {
 
 const getGaitStyle = (mph: number | null): string => {
   if (mph == null) return '--';
-  if (mph >= 2.5) return 'Power';
-  if (mph >= 2.0) return 'Swagger';
-  if (mph >= 1.5) return 'Strut';
-  if (mph >= 1.0) return 'Saunter';
-  if (mph >= 0.5) return 'Mosey';
-  return 'Trudge';
+  if (mph >= 2.5) return 'powerful';
+  if (mph >= 2.0) return 'swaggering';
+  if (mph >= 1.5) return 'strutting';
+  if (mph >= 1.0) return 'sauntering';
+  if (mph >= 0.5) return 'moseying';
+  return 'trudging';
 };
 
-const computeStrideScore = (
-  dst: number | null,
-  asymmetry: number | null,
-): string => {
-  if (dst == null || asymmetry == null) return '--';
-  const score = Math.round(100 - Math.abs(dst * 100 - 30) - 50 * asymmetry);
-  return String(Math.max(0, Math.min(100, score)));
+const getBalanceStyle = (dst: number | null): string => {
+  if (dst == null) return 'excellent';
+  if (dst <= 0.3) return 'excellent';
+  if (dst <= 0.4) return 'good';
+  return 'okay';
 };
 
 export const HomeScreen: React.FC = () => {
   const {
     todaySteps,
     chartData,
+    monthlyChartData,
     averageSteps,
     streak,
     allTimeDays,
@@ -67,7 +66,7 @@ export const HomeScreen: React.FC = () => {
 
   const speedMph = walkingSpeed != null ? walkingSpeed * 2.23694 : null;
   const strideStyle = getGaitStyle(speedMph);
-  const strideScore = computeStrideScore(walkingDST, walkingAsymmetry);
+  const balanceStyle = getBalanceStyle(walkingDST);
 
   const fmtSpeed = (v: number | null) =>
     v == null ? '--' : `${(v * 2.23694).toFixed(1)} mph`;
@@ -115,7 +114,11 @@ export const HomeScreen: React.FC = () => {
           <Text style={styles.narrativeItalic}>
             {ready ? strideStyle : '--'}
           </Text>
-          {' stride and excellent balance.'}
+          {' stride and '}
+          <Text style={styles.narrativeItalic}>
+            {ready ? balanceStyle : 'excellent'}
+          </Text>
+          {' balance.'}
           {aboveAvg
             ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.`
             : null}
@@ -218,17 +221,9 @@ export const HomeScreen: React.FC = () => {
           )}
         </View>
 
-        {/* Stride Score */}
-        <View style={styles.metricsSection}>
-          <View style={styles.highlightRow}>
-            <Text style={styles.highlightBold}>Stride Score</Text>
-            <Text style={styles.highlightBold}>{ready ? strideScore : '--'}</Text>
-          </View>
-        </View>
-
         {/* Chart */}
         <View style={styles.chartWrapper}>
-          <StepChart data={chartData} value={todaySteps} loading={isLoading} />
+          <StepChart data={chartData} value={todaySteps} monthlyData={monthlyChartData} loading={isLoading} />
         </View>
 
         {/* Error state */}
@@ -287,7 +282,7 @@ const styles = StyleSheet.create({
 
   // Narrative
   narrative: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: '400',
     color: colors.text,
     lineHeight: 22,
@@ -301,12 +296,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
-  // Stride Score (above chart)
-  metricsSection: {
-    gap: spacing.xs,
-    marginBottom: spacing.md,
-    paddingRight: spacing.lg,
-  },
   highlightRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -18,6 +18,7 @@ export interface ChartPoint {
 export interface HealthData {
   todaySteps: number;
   chartData: ChartPoint[];
+  monthlyChartData: ChartPoint[];
   averageSteps: number;
   streak: number;
   allTimeDays: number;
@@ -129,6 +130,7 @@ export const useHealthKit = (): HealthData => {
   const [data, setData] = useState<HealthData>({
     todaySteps: 0,
     chartData: [],
+    monthlyChartData: [],
     averageSteps: 0,
     streak: 0,
     allTimeDays: 0,
@@ -211,6 +213,30 @@ export const useHealthKit = (): HealthData => {
 
     const allTimeDays = [...stepsByDate.values()].filter((v) => v >= 10000).length;
 
+    // Monthly average daily steps for the last 12 months
+    const monthlyChartData: ChartPoint[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const nextMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+      let totalSteps = 0;
+      let daysWithData = 0;
+      const cursor = new Date(monthStart);
+      while (cursor < nextMonth && cursor <= now) {
+        const key = cursor.toDateString();
+        if (stepsByDate.has(key)) {
+          totalSteps += stepsByDate.get(key)!;
+          daysWithData++;
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      if (daysWithData > 0) {
+        monthlyChartData.push({
+          time: Math.floor(monthStart.getTime() / 1000),
+          value: Math.round(totalSteps / daysWithData),
+        });
+      }
+    }
+
     const [walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST] =
       await Promise.all([
         getLatestWalkingMetric('WalkingSpeed'),
@@ -223,6 +249,7 @@ export const useHealthKit = (): HealthData => {
     setData({
       todaySteps,
       chartData,
+      monthlyChartData,
       averageSteps,
       streak,
       allTimeDays,
