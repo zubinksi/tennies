@@ -36,6 +36,21 @@ const getGaitStyle = (mph: number | null): string => {
   return 'trudging';
 };
 
+const GAIT_COLORS: Record<string, string> = {
+  powerful: '#BCB58D',
+  swaggering: '#2B54A0',
+  strutting: '#25A87F',
+  sauntering: '#B792F2',
+  moseying: '#C083A3',
+  trudging: '#575F74',
+};
+
+const BALANCE_COLORS: Record<string, string> = {
+  excellent: '#32B482',
+  good: '#006FFF',
+  okay: '#FF5900',
+};
+
 const getBalanceStyle = (dst: number | null): string => {
   if (dst == null) return 'excellent';
   if (dst <= 0.3) return 'excellent';
@@ -131,11 +146,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             {ready ? formatNumber(todaySteps) : '--'}
           </Text>
           {' steps today with a '}
-          <Text style={styles.narrativeItalic}>
+          <Text style={[styles.narrativeItalic, ready && GAIT_COLORS[strideStyle] ? { color: '#FFFFFF', backgroundColor: GAIT_COLORS[strideStyle], borderRadius: 5, paddingHorizontal: 4, overflow: 'hidden' } : undefined]}>
             {ready ? strideStyle : '--'}
           </Text>
           {' stride and '}
-          <Text style={styles.narrativeItalic}>
+          <Text style={[styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
             {ready ? balanceStyle : 'excellent'}
           </Text>
           {' balance.'}
@@ -345,8 +360,14 @@ const styles = StyleSheet.create({
   goalTap: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.textMuted,
-    textDecorationLine: 'underline',
+    color: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: 5,
+    backgroundColor: '#2A2A2A',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    overflow: 'hidden',
   },
 
   // Chart

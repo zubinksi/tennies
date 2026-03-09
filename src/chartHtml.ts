@@ -4935,7 +4935,7 @@ function useAutoPlay({
               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
               color: 'rgba(0,0,0,0.4)', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
-              paddingBottom: '6px',
+              paddingBottom: '16px',
             }
           }, "Today's Steps"),
           React.createElement(Liveline, {
@@ -4977,7 +4977,7 @@ function useAutoPlay({
               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
               color: 'rgba(0,0,0,0.4)', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
-              paddingBottom: '6px',
+              paddingBottom: '16px',
             }
           }, 'Monthly Average'),
           React.createElement(Liveline, {
