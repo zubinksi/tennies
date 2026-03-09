@@ -30,6 +30,20 @@
           "NSHealthShareUsageDescription": "Tennies reads your step count and walking metrics (speed, step length, asymmetry, and double support time) to track your daily progress and pedestrian performance.",
           "NSHealthUpdateUsageDescription": "Tennies needs HealthKit write access to log your activity."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Tennies uses your photo library to let you choose a background photo for sharing.",
+          "cameraPermission": "Tennies uses the camera to let you take a photo for sharing."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Tennies saves your walk summary image to your photo library.",
+          "savePhotosPermission": "Tennies saves your walk summary image to your photo library."
+        }
       ]
     ]
   }
