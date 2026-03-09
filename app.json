@@ -22,7 +22,7 @@
         "com.apple.developer.healthkit.access": []
       }
     },
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "plugins": [
       [
         "react-native-health",

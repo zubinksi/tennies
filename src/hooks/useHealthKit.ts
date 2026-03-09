@@ -290,8 +290,8 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
   }, [stepGoal]);
 
   useEffect(() => {
-    if (!AppleHealthKit) {
-      console.log('[HealthKit] Native module not available');
+    if (!AppleHealthKit || typeof AppleHealthKit.initHealthKit !== 'function') {
+      console.log('[HealthKit] Native module not available or not loaded');
       setData((prev) => ({ ...prev, isLoading: false, isAuthorized: false }));
       return;
     }
