@@ -132,8 +132,10 @@ export const HomeScreen: React.FC = () => {
             onPress={() => setAdvancedExpanded((v) => !v)}
             hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
           >
-            <Text style={styles.detailsTitle}>Details</Text>
-            <Text style={styles.chevron}>{advancedExpanded ? '▲' : '▽'}</Text>
+            <Text style={styles.detailsTitle}>
+              Details{' '}
+              <Text style={styles.chevron}>{advancedExpanded ? '▲' : '▽'}</Text>
+            </Text>
           </TouchableOpacity>
 
           {advancedExpanded && (
@@ -320,6 +322,9 @@ const styles = StyleSheet.create({
   // Chart
   chartWrapper: {
     marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: 16,
   },
 
   errorText: {

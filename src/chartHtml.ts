@@ -4923,6 +4923,14 @@ function useAutoPlay({
               opacity: active === 0 ? 1 : 0,
               pointerEvents: active === 0 ? 'auto' : 'none',
             }) },
+          React.createElement('div', {
+            style: {
+              position: 'absolute', top: '10px', left: '14px',
+              fontSize: '11px', fontWeight: '500',
+              color: 'rgba(0,0,0,0.4)', zIndex: 10,
+              pointerEvents: 'none', letterSpacing: '0.02em',
+            }
+          }, "Today's Steps"),
           React.createElement(Liveline, {
             data: todayChart.data,
             value: todayChart.value,
@@ -4937,7 +4945,7 @@ function useAutoPlay({
             pulse: false,
             momentum: false,
             scrub: true,
-            referenceLine: { value: 10000, label: 'Reach 10K Daily Steps' },
+            referenceLine: { value: 10000, label: '10,000' },
             formatValue: function (v) { return Math.round(v).toLocaleString(); },
             formatTime: function (t) {
               var d = new Date(t * 1000);
@@ -4955,6 +4963,14 @@ function useAutoPlay({
               opacity: active === 1 ? 1 : 0,
               pointerEvents: active === 1 ? 'auto' : 'none',
             }) },
+          React.createElement('div', {
+            style: {
+              position: 'absolute', top: '10px', left: '14px',
+              fontSize: '11px', fontWeight: '500',
+              color: 'rgba(0,0,0,0.4)', zIndex: 10,
+              pointerEvents: 'none', letterSpacing: '0.02em',
+            }
+          }, 'Monthly Average'),
           React.createElement(Liveline, {
             data: monthlyChart.data,
             value: monthlyChart.value,
