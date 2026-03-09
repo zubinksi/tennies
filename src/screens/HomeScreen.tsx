@@ -5,13 +5,13 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  Share,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StepChart } from '../components/StepChart';
 import { useHealthKit } from '../hooks/useHealthKit';
 import { colors, spacing } from '../theme';
+import { NarrativeParts } from './ShareScreen';
 
 const formatNumber = (n: number): string => n.toLocaleString('en-US');
 
@@ -43,7 +43,11 @@ const getBalanceStyle = (dst: number | null): string => {
   return 'okay';
 };
 
-export const HomeScreen: React.FC = () => {
+interface HomeScreenProps {
+  onNavigateToShare: (parts: NarrativeParts) => void;
+}
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => {
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [stepGoal, setStepGoal] = useState(10000);
@@ -101,14 +105,14 @@ export const HomeScreen: React.FC = () => {
     );
   };
 
-  const handleShare = async () => {
-    const steps = ready ? formatNumber(todaySteps) : '0';
-    const gait = speedMph != null ? strideStyle : 'unknown';
-    try {
-      await Share.share({
-        message: `Today's walk: ${steps} steps · Stride style: ${gait} 🚶`,
-      });
-    } catch (_) {}
+  const handleShare = () => {
+    onNavigateToShare({
+      steps: ready ? formatNumber(todaySteps) : '--',
+      strideStyle: ready ? strideStyle : '--',
+      balanceStyle: ready ? balanceStyle : 'excellent',
+      aboveAvgSteps: aboveAvg ? formatNumber(todaySteps - averageSteps) : null,
+      nearAvg,
+    });
   };
 
   return (

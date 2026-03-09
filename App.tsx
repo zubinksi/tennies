@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, StyleSheet } from 'react-native';
 import { HomeScreen } from './src/screens/HomeScreen';
+import { ShareScreen, NarrativeParts } from './src/screens/ShareScreen';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -64,11 +65,32 @@ const errorStyles = StyleSheet.create({
 });
 
 export default function App() {
+  const [screen, setScreen] = useState<'home' | 'share'>('home');
+  const [narrativeParts, setNarrativeParts] = useState<NarrativeParts>({
+    steps: '--',
+    strideStyle: '--',
+    balanceStyle: 'excellent',
+    aboveAvgSteps: null,
+    nearAvg: false,
+  });
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
         <StatusBar style="dark" />
-        <HomeScreen />
+        {screen === 'home' ? (
+          <HomeScreen
+            onNavigateToShare={(parts) => {
+              setNarrativeParts(parts);
+              setScreen('share');
+            }}
+          />
+        ) : (
+          <ShareScreen
+            narrativeParts={narrativeParts}
+            onBack={() => setScreen('home')}
+          />
+        )}
       </SafeAreaProvider>
     </ErrorBoundary>
   );
