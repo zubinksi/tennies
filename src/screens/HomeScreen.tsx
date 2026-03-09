@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingLeft: spacing.lg,
-    paddingRight: 0,
+    paddingRight: 10,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
@@ -289,7 +289,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 22,
     marginBottom: spacing.md,
-    paddingRight: spacing.lg,
   },
   narrativeBold: {
     fontWeight: '700',
@@ -338,7 +337,6 @@ const styles = StyleSheet.create({
   streakSection: {
     gap: spacing.xs,
     marginBottom: spacing.lg,
-    paddingRight: spacing.lg,
   },
 
   // Details (formerly Advanced Metrics)
@@ -349,7 +347,6 @@ const styles = StyleSheet.create({
   },
   advancedSection: {
     marginBottom: spacing.md,
-    paddingRight: spacing.lg,
   },
   advancedHeader: {
     flexDirection: 'row',
@@ -399,7 +396,6 @@ const styles = StyleSheet.create({
 
   // Share button
   shareButton: {
-    marginRight: spacing.lg,
     marginTop: spacing.xs,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,

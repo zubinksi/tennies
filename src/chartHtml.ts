@@ -4927,8 +4927,10 @@ function useAutoPlay({
             style: {
               position: 'absolute', top: '10px', left: '14px',
               fontSize: '11px', fontWeight: '500',
+              fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
               color: 'rgba(0,0,0,0.4)', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
+              paddingBottom: '6px',
             }
           }, "Today's Steps"),
           React.createElement(Liveline, {
@@ -4967,8 +4969,10 @@ function useAutoPlay({
             style: {
               position: 'absolute', top: '10px', left: '14px',
               fontSize: '11px', fontWeight: '500',
+              fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
               color: 'rgba(0,0,0,0.4)', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
+              paddingBottom: '6px',
             }
           }, 'Monthly Average'),
           React.createElement(Liveline, {
