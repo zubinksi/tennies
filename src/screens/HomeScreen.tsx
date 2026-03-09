@@ -79,6 +79,13 @@ export const HomeScreen: React.FC = () => {
   const ready = !isLoading && isAuthorized;
   const streakColor = ready && streak > 0 ? '#599a59' : colors.text;
 
+  const aboveAvg = ready && todaySteps > averageSteps;
+  const nearAvg =
+    ready &&
+    !aboveAvg &&
+    averageSteps > 0 &&
+    todaySteps >= averageSteps * 0.85;
+
   const handleShare = async () => {
     const steps = ready ? formatNumber(todaySteps) : '0';
     const gait = speedMph != null ? strideStyle : 'unknown';
@@ -98,61 +105,31 @@ export const HomeScreen: React.FC = () => {
         {/* Wordmark */}
         <Text style={styles.wordmark}>TENNIES</Text>
 
-        {/* Highlights — above chart */}
-        <View style={styles.metricsSection}>
-          <View style={styles.highlightRow}>
-            <Text style={styles.highlightBold}>Steps Today</Text>
-            <Text style={styles.highlightBold}>
-              {ready ? formatNumber(todaySteps) : '--'}
-            </Text>
-          </View>
-          <View style={styles.highlightRow}>
-            <Text style={styles.highlightNormal}>Stride Style</Text>
-            <Text style={styles.highlightNormal}>{ready ? strideStyle : '--'}</Text>
-          </View>
-          <View style={styles.highlightRow}>
-            <Text style={styles.highlightBold}>Stride Score</Text>
-            <Text style={styles.highlightBold}>{ready ? strideScore : '--'}</Text>
-          </View>
-        </View>
-
-        {/* Chart */}
-        <View style={styles.chartWrapper}>
-          <StepChart data={chartData} value={todaySteps} loading={isLoading} />
-        </View>
-
-        {/* Error state */}
-        {!isLoading && !isAuthorized && (
-          <Text style={styles.errorText}>
-            Enable HealthKit access in Settings to track your steps.
+        {/* Narrative sentence */}
+        <Text style={styles.narrative}>
+          {'You\'ve taken '}
+          <Text style={styles.narrativeBold}>
+            {ready ? formatNumber(todaySteps) : '--'}
           </Text>
-        )}
+          {' steps today with a '}
+          <Text style={styles.narrativeItalic}>
+            {ready ? strideStyle : '--'}
+          </Text>
+          {' stride and excellent balance.'}
+          {aboveAvg
+            ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.`
+            : null}
+          {nearAvg ? ' You are right around your average for the month.' : null}
+        </Text>
 
-        {/* 10K Streak — below chart */}
-        <View style={styles.streakSection}>
-          <Text style={styles.highlightGroupLabel}>Hit 10,000 Daily Steps</Text>
-          <View style={styles.highlightRow}>
-            <Text style={styles.highlightBold}>Current streak</Text>
-            <Text style={[styles.highlightBold, { color: streakColor }]}>
-              {ready ? String(streak) : '--'}
-            </Text>
-          </View>
-          <View style={styles.highlightRow}>
-            <Text style={styles.highlightNormal}>All Time</Text>
-            <Text style={styles.highlightNormal}>
-              {ready ? formatNumber(allTimeDays) : '--'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Advanced Metrics — collapsed by default */}
+        {/* Details — collapsed, right under narrative */}
         <View style={styles.advancedSection}>
           <TouchableOpacity
             style={styles.advancedHeader}
             onPress={() => setAdvancedExpanded((v) => !v)}
             hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
           >
-            <Text style={styles.sectionTitle}>Advanced Metrics</Text>
+            <Text style={styles.detailsTitle}>Details</Text>
             <Text style={styles.chevron}>{advancedExpanded ? '▲' : '▽'}</Text>
           </TouchableOpacity>
 
@@ -241,6 +218,43 @@ export const HomeScreen: React.FC = () => {
           )}
         </View>
 
+        {/* Stride Score */}
+        <View style={styles.metricsSection}>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBold}>Stride Score</Text>
+            <Text style={styles.highlightBold}>{ready ? strideScore : '--'}</Text>
+          </View>
+        </View>
+
+        {/* Chart */}
+        <View style={styles.chartWrapper}>
+          <StepChart data={chartData} value={todaySteps} loading={isLoading} />
+        </View>
+
+        {/* Error state */}
+        {!isLoading && !isAuthorized && (
+          <Text style={styles.errorText}>
+            Enable HealthKit access in Settings to track your steps.
+          </Text>
+        )}
+
+        {/* 10K Streak — below chart */}
+        <View style={styles.streakSection}>
+          <Text style={styles.highlightGroupLabel}>Hit 10,000 Daily Steps</Text>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBold}>Current streak</Text>
+            <Text style={[styles.highlightBold, { color: streakColor }]}>
+              {ready ? String(streak) : '--'}
+            </Text>
+          </View>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightNormal}>All Time</Text>
+            <Text style={styles.highlightNormal}>
+              {ready ? formatNumber(allTimeDays) : '--'}
+            </Text>
+          </View>
+        </View>
+
         {/* Share Button */}
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
           <Text style={styles.shareButtonText}>Share Today's Walk</Text>
@@ -268,10 +282,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'Menlo',
     color: colors.text,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
 
-  // Highlights (above chart)
+  // Narrative
+  narrative: {
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.text,
+    lineHeight: 22,
+    marginBottom: spacing.md,
+    paddingRight: spacing.lg,
+  },
+  narrativeBold: {
+    fontWeight: '700',
+  },
+  narrativeItalic: {
+    fontStyle: 'italic',
+  },
+
+  // Stride Score (above chart)
   metricsSection: {
     gap: spacing.xs,
     marginBottom: spacing.md,
@@ -317,14 +347,14 @@ const styles = StyleSheet.create({
     paddingRight: spacing.lg,
   },
 
-  // Advanced Metrics
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
+  // Details (formerly Advanced Metrics)
+  detailsTitle: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: colors.textMuted,
   },
   advancedSection: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     paddingRight: spacing.lg,
   },
   advancedHeader: {
@@ -334,7 +364,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   chevron: {
-    fontSize: 12,
+    fontSize: 10,
     color: colors.textMuted,
   },
   advancedCard: {
