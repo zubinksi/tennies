@@ -67,6 +67,10 @@ const chartScript = `
     var monthlyChart = monthlyState[0];
     var setMonthlyChart = monthlyState[1];
 
+    var stepGoalState = React.useState(10000);
+    var stepGoal = stepGoalState[0];
+    var setStepGoal = stepGoalState[1];
+
     React.useEffect(function () {
       function handle(e) {
         try {
@@ -76,6 +80,7 @@ const chartScript = `
             var d = msg.data;
             var w = d.length > 1 ? (d[d.length - 1].time - d[0].time + 60) : 86400;
             setTodayChart({ data: d, value: msg.value, loading: false, window: w });
+            if (msg.stepGoal) setStepGoal(msg.stepGoal);
           } else if (msg.type === 'MONTHLY_DATA') {
             var md = msg.data;
             var mv = md.length > 0 ? md[md.length - 1].value : 0;
@@ -138,7 +143,7 @@ const chartScript = `
             pulse: false,
             momentum: false,
             scrub: true,
-            referenceLine: { value: 10000, label: '10,000' },
+            referenceLine: { value: stepGoal, label: stepGoal.toLocaleString() },
             formatValue: function (v) { return Math.round(v).toLocaleString(); },
             formatTime: function (t) {
               var d = new Date(t * 1000);

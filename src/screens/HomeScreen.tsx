@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Share,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StepChart } from '../components/StepChart';
@@ -43,6 +44,10 @@ const getBalanceStyle = (dst: number | null): string => {
 };
 
 export const HomeScreen: React.FC = () => {
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
+  const [stepGoal, setStepGoal] = useState(10000);
+
   const {
     todaySteps,
     chartData,
@@ -56,10 +61,7 @@ export const HomeScreen: React.FC = () => {
     walkingDST,
     isLoading,
     isAuthorized,
-  } = useHealthKit();
-
-  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
-  const [advancedExpanded, setAdvancedExpanded] = useState(false);
+  } = useHealthKit(stepGoal);
 
   const toggle = (key: string) =>
     setOpenTooltip((prev) => (prev === key ? null : key));
@@ -84,6 +86,20 @@ export const HomeScreen: React.FC = () => {
     !aboveAvg &&
     averageSteps > 0 &&
     todaySteps >= averageSteps * 0.85;
+
+  const handleEditGoal = () => {
+    Alert.prompt(
+      'Daily Step Goal',
+      'Enter your step goal:',
+      (value) => {
+        const n = parseInt(value.replace(/,/g, ''), 10);
+        if (!isNaN(n) && n > 0) setStepGoal(n);
+      },
+      'plain-text',
+      String(stepGoal),
+      'number-pad',
+    );
+  };
 
   const handleShare = async () => {
     const steps = ready ? formatNumber(todaySteps) : '0';
@@ -134,7 +150,7 @@ export const HomeScreen: React.FC = () => {
           >
             <Text style={styles.detailsTitle}>
               Details{' '}
-              <Text style={styles.chevron}>{advancedExpanded ? '▲' : '▽'}</Text>
+              <Text style={styles.chevron}>{advancedExpanded ? '−' : '+'}</Text>
             </Text>
           </TouchableOpacity>
 
@@ -225,7 +241,7 @@ export const HomeScreen: React.FC = () => {
 
         {/* Chart */}
         <View style={styles.chartWrapper}>
-          <StepChart data={chartData} value={todaySteps} monthlyData={monthlyChartData} loading={isLoading} />
+          <StepChart data={chartData} value={todaySteps} monthlyData={monthlyChartData} stepGoal={stepGoal} loading={isLoading} />
         </View>
 
         {/* Error state */}
@@ -237,7 +253,12 @@ export const HomeScreen: React.FC = () => {
 
         {/* 10K Streak — below chart */}
         <View style={styles.streakSection}>
-          <Text style={styles.highlightGroupLabel}>Hit 10,000 Daily Steps</Text>
+          <Text style={styles.highlightGroupLabel}>
+            {'Daily Step Goal: '}
+            <Text style={styles.goalTap} onPress={handleEditGoal}>
+              {formatNumber(stepGoal)}
+            </Text>
+          </Text>
           <View style={styles.highlightRow}>
             <Text style={styles.highlightBold}>Current streak</Text>
             <Text style={[styles.highlightBold, { color: streakColor }]}>
@@ -268,7 +289,7 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingLeft: spacing.lg,
-    paddingRight: 10,
+    paddingRight: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
@@ -316,6 +337,12 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: colors.textMuted,
     marginBottom: spacing.xs,
+  },
+  goalTap: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textDecorationLine: 'underline',
   },
 
   // Chart

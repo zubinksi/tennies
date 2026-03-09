@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Defensively import react-native-health — on unsupported simulators or
 // misconfigured builds the native module may not exist, which would crash
@@ -126,7 +126,11 @@ const getLatestWalkingMetric = (type: string): Promise<number | null> => {
   });
 };
 
-export const useHealthKit = (): HealthData => {
+export const useHealthKit = (stepGoal: number = 10000): HealthData => {
+  // Store raw daily steps so goal changes can recompute without re-fetching
+  const stepsByDateRef = useRef<Map<string, number>>(new Map());
+  const stepGoalRef = useRef(stepGoal);
+  stepGoalRef.current = stepGoal;
   const [data, setData] = useState<HealthData>({
     todaySteps: 0,
     chartData: [],
@@ -183,6 +187,7 @@ export const useHealthKit = (): HealthData => {
       stepsByDate.set(key, (stepsByDate.get(key) ?? 0) + sample.value);
     }
     stepsByDate.set(today.toDateString(), todaySteps);
+    stepsByDateRef.current = stepsByDate;
 
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -198,12 +203,13 @@ export const useHealthKit = (): HealthData => {
           )
         : 0;
 
+    const goal = stepGoalRef.current;
     let streak = 0;
     const cursor = new Date(today);
     while (true) {
       const key = cursor.toDateString();
       const steps = stepsByDate.get(key) ?? 0;
-      if (steps >= 10000) {
+      if (steps >= goal) {
         streak++;
         cursor.setDate(cursor.getDate() - 1);
       } else {
@@ -211,7 +217,7 @@ export const useHealthKit = (): HealthData => {
       }
     }
 
-    const allTimeDays = [...stepsByDate.values()].filter((v) => v >= 10000).length;
+    const allTimeDays = [...stepsByDate.values()].filter((v) => v >= goal).length;
 
     // Monthly average daily steps for the last 12 months
     const monthlyChartData: ChartPoint[] = [];
@@ -261,6 +267,27 @@ export const useHealthKit = (): HealthData => {
       isLoading: false,
     });
   }, []);
+
+  // Recompute goal-dependent fields when stepGoal changes (no re-fetch needed)
+  useEffect(() => {
+    const stepsByDate = stepsByDateRef.current;
+    if (stepsByDate.size === 0) return;
+    const today = startOfDay();
+    let streak = 0;
+    const cursor = new Date(today);
+    while (true) {
+      const key = cursor.toDateString();
+      const steps = stepsByDate.get(key) ?? 0;
+      if (steps >= stepGoal) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    const allTimeDays = [...stepsByDate.values()].filter((v) => v >= stepGoal).length;
+    setData((prev) => ({ ...prev, streak, allTimeDays }));
+  }, [stepGoal]);
 
   useEffect(() => {
     if (!AppleHealthKit) {
