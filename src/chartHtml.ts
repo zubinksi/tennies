@@ -4407,7 +4407,7 @@ function LivelineTransition({
         value: chartState.value,
         loading: chartState.loading,
         theme: 'light',
-        color: '#599a59',
+        color: '#FFB700',
         window: chartState.window,
         grid: true,
         fill: true,
