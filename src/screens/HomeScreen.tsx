@@ -146,33 +146,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
         <Text style={styles.wordmark}>TENNIES</Text>
 
         {/* Narrative sentence */}
-        <View style={styles.narrativeWrap}>
+        <Text style={[styles.narrative, styles.narrativeWrap]}>
           {goalAchieved && (
-            <Text style={[styles.narrative, { color: '#32B482' }]}>
-              {'Daily step goal achieved! '}
-            </Text>
+            <Text style={{ color: '#32B482' }}>{'Daily step goal achieved! '}</Text>
           )}
-          <Text style={styles.narrative}>{'You\'ve taken '}</Text>
-          <Text style={[styles.narrative, styles.narrativeBold]}>
+          {'You\'ve taken '}
+          <Text style={styles.narrativeBold}>
             {ready ? formatNumber(todaySteps) : '--'}
           </Text>
-          <Text style={styles.narrative}>{' steps today with a '}</Text>
-          <Text style={[styles.narrative, styles.narrativeItalic]}>
+          {' steps today with a '}
+          <Text style={styles.narrativeItalic}>
             {ready ? strideStyle : '--'}
           </Text>
-          <Text style={styles.narrative}>{' stride of '}</Text>
-          <Text style={styles.narrative}>
-            {fmtSpeed(walkingSpeed)}
+          {' stride of '}
+          {fmtSpeed(walkingSpeed)}
+          {' and '}
+          <Text style={[ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined, styles.narrativeItalic]}>
+            {ready ? balanceStyle : 'excellent'}
           </Text>
-          <Text style={styles.narrative}>{' and '}</Text>
-          <Text style={styles.narrative}>
-            <Text style={[ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined, styles.narrativeItalic]}>
-              {ready ? balanceStyle : 'excellent'}
-            </Text>
-            {' balance.'}
-            {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
-          </Text>
-        </View>
+          {' balance.'}
+          {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
+        </Text>
 
         {/* Details — collapsed, right under narrative */}
         <View style={styles.advancedSection}>
@@ -344,9 +338,6 @@ const styles = StyleSheet.create({
 
   // Narrative
   narrativeWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
     marginBottom: spacing.md,
   },
   narrative: {
