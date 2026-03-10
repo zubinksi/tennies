@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   Dimensions,
   Alert,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import * as MediaLibrary from 'expo-media-library';
 import ViewShot from 'react-native-view-shot';
 import { colors, spacing } from '../theme';
 
@@ -34,9 +34,9 @@ interface ShareScreenProps {
 export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack }) => {
   const captureRef = useRef<ViewShot>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
-  const { steps, strideStyle, balanceStyle, aboveAvgSteps, nearAvg } = narrativeParts;
+  const { steps, strideStyle, balanceStyle } = narrativeParts;
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -61,22 +61,16 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
     if (!result.canceled) setImageUri(result.assets[0].uri);
   };
 
-  const handleSave = async () => {
+  const handleShare = async () => {
     if (!captureRef.current) return;
-    setSaving(true);
+    setSharing(true);
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Allow photo library access to save.');
-        return;
-      }
       const uri = await (captureRef.current as any).capture();
-      await MediaLibrary.saveToLibraryAsync(uri);
-      Alert.alert('Saved', 'Image saved to your photo library.');
+      await Share.share({ url: uri });
     } catch (e) {
-      Alert.alert('Error', 'Could not save the image.');
+      Alert.alert('Error', 'Could not share the image.');
     } finally {
-      setSaving(false);
+      setSharing(false);
     }
   };
 
@@ -115,17 +109,21 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
               style={StyleSheet.absoluteFill}
               resizeMode="cover"
             />
-            {/* Narrative overlay */}
+            {/* Stats overlay */}
             <View style={styles.narrativeOverlay}>
-              <Text style={styles.narrativeText}>
-                {'I\'ve taken '}
-                <Text style={styles.narrativeBold}>{steps}</Text>
-                {' steps today with a '}
-                <Text style={styles.narrativeItalic}>{strideStyle}</Text>
-                {' stride and '}
-                <Text style={styles.narrativeItalic}>{balanceStyle}</Text>
-                {' balance.'}
+              <Text style={styles.overlayLine}>
+                <Text style={styles.overlayLabel}>Steps: </Text>
+                <Text style={styles.overlayValue}>{steps}</Text>
               </Text>
+              <Text style={styles.overlayLine}>
+                <Text style={styles.overlayLabel}>Stride: </Text>
+                <Text style={styles.overlayValue}>{strideStyle}</Text>
+              </Text>
+              <Text style={styles.overlayLine}>
+                <Text style={styles.overlayLabel}>Balance: </Text>
+                <Text style={styles.overlayValue}>{balanceStyle}</Text>
+              </Text>
+              <Text style={styles.overlayPowered}>Powered by Tennies</Text>
             </View>
           </ViewShot>
         )}
@@ -138,14 +136,14 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
             <Text style={styles.changeButtonText}>Change Photo</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={saving}
+            style={[styles.shareButton, sharing && styles.shareButtonDisabled]}
+            onPress={handleShare}
+            disabled={sharing}
           >
-            {saving ? (
+            {sharing ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Text style={styles.saveButtonText}>Save Image</Text>
+              <Text style={styles.shareButtonText}>Share Image</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -225,12 +223,11 @@ const styles = StyleSheet.create({
   // ViewShot / captured area
   captureArea: {
     flex: 1,
-    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#000',
   },
 
-  // Narrative overlay on image
+  // Stats overlay on image
   narrativeOverlay: {
     position: 'absolute',
     bottom: 0,
@@ -239,19 +236,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    gap: 4,
   },
-  narrativeText: {
-    fontSize: 16,
+  overlayLine: {
     color: '#FFFFFF',
-    lineHeight: 24,
+    fontSize: 18,
+    lineHeight: 26,
   },
-  narrativeBold: {
+  overlayLabel: {
+    fontWeight: '400',
+    color: 'rgba(255,255,255,0.75)',
+  },
+  overlayValue: {
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  narrativeItalic: {
-    fontStyle: 'italic',
-    color: '#FFFFFF',
+  overlayPowered: {
+    marginTop: 8,
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.5)',
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
 
   // Bottom bar
@@ -275,17 +280,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.text,
   },
-  saveButton: {
+  shareButton: {
     flex: 2,
     paddingVertical: spacing.md,
     borderRadius: 10,
     alignItems: 'center',
     backgroundColor: colors.text,
   },
-  saveButtonDisabled: {
+  shareButtonDisabled: {
     opacity: 0.6,
   },
-  saveButtonText: {
+  shareButtonText: {
     fontSize: 15,
     fontWeight: '600',
     color: '#FFFFFF',
