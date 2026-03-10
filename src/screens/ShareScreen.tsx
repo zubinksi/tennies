@@ -31,6 +31,16 @@ interface ShareScreenProps {
   onBack: () => void;
 }
 
+const formatShareDate = (): string => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${mm}/${dd}/${yyyy}`;
+};
+
+const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+
 export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack }) => {
   const captureRef = useRef<ViewShot>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -38,10 +48,13 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
 
   const { steps, strideStyle, balanceStyle } = narrativeParts;
 
+  const shareDate = formatShareDate();
+  const capitalizedStride = capitalize(strideStyle);
+
   const shareTextOnly = async () => {
     try {
       await Share.share({
-        message: `Steps: ${steps}\nStride: ${strideStyle}\nBalance: ${balanceStyle}\n\nPowered by Tennies`,
+        message: `${shareDate}\n\n${steps} ${capitalizedStride} Steps\n\nPowered by Tennies`,
       });
     } catch (e) {
       Alert.alert('Error', 'Could not share.');
@@ -124,18 +137,8 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
             />
             {/* Stats overlay */}
             <View style={styles.narrativeOverlay}>
-              <Text style={styles.overlayLine}>
-                <Text style={styles.overlayLabel}>Steps: </Text>
-                <Text style={styles.overlayValue}>{steps}</Text>
-              </Text>
-              <Text style={styles.overlayLine}>
-                <Text style={styles.overlayLabel}>Stride: </Text>
-                <Text style={styles.overlayValue}>{strideStyle}</Text>
-              </Text>
-              <Text style={styles.overlayLine}>
-                <Text style={styles.overlayLabel}>Balance: </Text>
-                <Text style={styles.overlayValue}>{balanceStyle}</Text>
-              </Text>
+              <Text style={styles.overlayLine}>{shareDate}</Text>
+              <Text style={styles.overlayLine}>{steps} {capitalizedStride} Steps</Text>
               <Text style={styles.overlayPowered}>Powered by Tennies</Text>
             </View>
           </ViewShot>
@@ -248,7 +251,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'transparent',
     gap: 4,
   },
   overlayLine: {
