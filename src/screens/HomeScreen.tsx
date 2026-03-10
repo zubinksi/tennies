@@ -80,6 +80,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
   const speedMph = walkingSpeed != null ? walkingSpeed * 2.23694 : null;
   const strideStyle = getGaitStyle(speedMph);
   const balanceStyle = getBalanceStyle(walkingDST);
+  const milePace = speedMph != null ? Math.round(60 / speedMph) : null;
 
   const fmtSpeed = (v: number | null) =>
     v == null ? '--' : `${(v * 2.23694).toFixed(1)} mph`;
@@ -93,6 +94,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
   const ready = !isLoading && isAuthorized;
   const streakColor = ready && streak > 0 ? '#599a59' : colors.text;
 
+  const goalAchieved = ready && todaySteps >= stepGoal;
   const aboveAvg = ready && todaySteps > averageSteps;
   const nearAvg =
     ready &&
@@ -145,14 +147,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           </Text>
           <Text style={styles.narrative}>{' average stride of '}</Text>
           <Text style={styles.narrative}>
-            {fmtSpeed(walkingSpeed)}
+            {fmtSpeed(walkingSpeed)}{milePace != null ? ` (${milePace} min mile)` : ''}
           </Text>
           <Text style={styles.narrative}>{' and '}</Text>
-          <Text style={[styles.narrative, styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
-            {ready ? balanceStyle : 'excellent'}
-          </Text>
           <Text style={styles.narrative}>
+            <Text style={[styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
+              {ready ? balanceStyle : 'excellent'}
+            </Text>
             {' balance.'}
+            {goalAchieved ? ' Daily step goal achieved -- very pedestrian!' : ''}
             {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
           </Text>
         </View>
@@ -366,7 +369,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#32B482',
-    textDecorationLine: 'underline',
   },
 
   // Chart

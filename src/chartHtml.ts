@@ -10,8 +10,8 @@ export const CHART_HTML = `<!DOCTYPE html>
     body { background: #EBEBEB; overflow: hidden; }
     /* src/styles/Stepper.css */
 .pasito-container {
-  --pill-dot-size: 8px;
-  --pill-active-width: 24px;
+  --pill-dot-size: 11px;
+  --pill-active-width: 30px;
   --pill-gap: 6px;
   --pill-duration: 500ms;
   --pill-easing: cubic-bezier(0.215, 0.61, 0.355, 1);
