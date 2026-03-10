@@ -140,25 +140,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
         <Text style={styles.wordmark}>TENNIES</Text>
 
         {/* Narrative sentence */}
-        <Text style={styles.narrative}>
-          {'You\'ve taken '}
-          <Text style={styles.narrativeBold}>
+        <View style={styles.narrativeWrap}>
+          <Text style={styles.narrative}>{'You\'ve taken '}</Text>
+          <Text style={[styles.narrative, styles.narrativeBold]}>
             {ready ? formatNumber(todaySteps) : '--'}
           </Text>
-          {' steps today with a '}
-          <Text style={[styles.narrativeItalic, ready && GAIT_COLORS[strideStyle] ? { color: '#FFFFFF', backgroundColor: GAIT_COLORS[strideStyle], borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' } : undefined]}>
-            {ready ? strideStyle : '--'}
-          </Text>
-          {' stride and '}
-          <Text style={[styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
+          <Text style={styles.narrative}>{' steps today with a '}</Text>
+          <View style={[styles.gaitPill, ready && GAIT_COLORS[strideStyle] ? { backgroundColor: GAIT_COLORS[strideStyle] } : { backgroundColor: 'transparent' }]}>
+            <Text style={[styles.narrativeItalic, { color: ready ? '#FFFFFF' : colors.text }]}>
+              {ready ? strideStyle : '--'}
+            </Text>
+          </View>
+          <Text style={styles.narrative}>{' stride and '}</Text>
+          <Text style={[styles.narrative, styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
             {ready ? balanceStyle : 'excellent'}
           </Text>
-          {' balance.'}
-          {aboveAvg
-            ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.`
-            : null}
-          {nearAvg ? ' You are right around your average for the month.' : null}
-        </Text>
+          <Text style={styles.narrative}>{' balance.'}</Text>
+          {aboveAvg ? (
+            <Text style={styles.narrative}>{` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.`}</Text>
+          ) : nearAvg ? (
+            <Text style={styles.narrative}>{' You are right around your average for the month.'}</Text>
+          ) : null}
+        </View>
 
         {/* Details — collapsed, right under narrative */}
         <View style={styles.advancedSection}>
@@ -323,18 +326,28 @@ const styles = StyleSheet.create({
   },
 
   // Narrative
+  narrativeWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
   narrative: {
     fontSize: 17,
     fontWeight: '400',
     color: colors.text,
     lineHeight: 22,
-    marginBottom: spacing.md,
   },
   narrativeBold: {
     fontWeight: '700',
   },
   narrativeItalic: {
     fontStyle: 'italic',
+  },
+  gaitPill: {
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
 
   highlightRow: {
