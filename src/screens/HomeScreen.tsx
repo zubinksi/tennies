@@ -145,7 +145,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           <Text style={[styles.narrative, styles.narrativeItalic]}>
             {ready ? strideStyle : '--'}
           </Text>
-          <Text style={styles.narrative}>{' average stride of '}</Text>
+          <Text style={styles.narrative}>{' stride of '}</Text>
           <Text style={styles.narrative}>
             {fmtSpeed(walkingSpeed)}
           </Text>
@@ -155,7 +155,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
               {ready ? balanceStyle : 'excellent'}
             </Text>
             {' balance.'}
-            {goalAchieved ? ' Daily step goal achieved -- very pedestrian!' : ''}
+            {goalAchieved ? ' Daily step goal achieved ⭐ -- very pedestrian!' : ''}
             {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
           </Text>
         </View>
@@ -191,7 +191,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                   </Text>
                 </TouchableOpacity>
                 <Text style={styles.tableValue}>
-                  {fmtSpeed(walkingSpeed)}{milePace != null ? <Text style={styles.tableValueMuted}> ({milePace} min mile)</Text> : null}
+                  {milePace != null ? <Text style={styles.tableValueMuted}>{milePace} min mile  </Text> : null}{fmtSpeed(walkingSpeed)}
                 </Text>
               </View>
 
@@ -285,9 +285,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             </Text>
           </Text>
           <View style={styles.highlightRow}>
-            <Text style={styles.highlightBold}>Current streak</Text>
+            <Text style={styles.highlightBold}>Current Streak</Text>
             <Text style={[styles.highlightBold, { color: streakColor }]}>
-              {ready ? String(streak) : '--'}
+              {ready && streak > 0 ? '🔥 ' : ''}{ready ? String(streak) : '--'}
             </Text>
           </View>
           <View style={styles.highlightRow}>

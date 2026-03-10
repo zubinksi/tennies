@@ -4933,7 +4933,7 @@ function useAutoPlay({
               position: 'absolute', top: '10px', left: '14px',
               fontSize: '11px', fontWeight: '500',
               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-              color: 'rgba(0,0,0,0.5)', zIndex: 10,
+              color: '#32B482', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
@@ -4975,7 +4975,7 @@ function useAutoPlay({
               position: 'absolute', top: '10px', left: '14px',
               fontSize: '11px', fontWeight: '500',
               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-              color: 'rgba(0,0,0,0.5)', zIndex: 10,
+              color: '#32B482', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
