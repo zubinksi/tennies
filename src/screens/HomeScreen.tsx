@@ -144,19 +144,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             {ready ? strideStyle : '--'}
           </Text>
           <Text style={styles.narrative}>{' average stride of '}</Text>
-          <Text style={[styles.narrative, styles.narrativeBold]}>
+          <Text style={styles.narrative}>
             {fmtSpeed(walkingSpeed)}
           </Text>
           <Text style={styles.narrative}>{' and '}</Text>
           <Text style={[styles.narrative, styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
             {ready ? balanceStyle : 'excellent'}
           </Text>
-          <Text style={styles.narrative}>{' balance.'}</Text>
-          {aboveAvg ? (
-            <Text style={styles.narrative}>{` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.`}</Text>
-          ) : nearAvg ? (
-            <Text style={styles.narrative}>{' You are right around your average for the month.'}</Text>
-          ) : null}
+          <Text style={styles.narrative}>
+            {' balance.'}
+            {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
+          </Text>
         </View>
 
         {/* Details — collapsed, right under narrative */}
@@ -227,7 +225,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                     Asymmetry
                   </Text>
                 </TouchableOpacity>
-                <Text style={[styles.tableValue, walkingAsymmetry != null && walkingAsymmetry < 0.025 ? { color: '#FFB700' } : undefined]}>
+                <Text style={[styles.tableValue, walkingAsymmetry != null && walkingAsymmetry < 0.025 ? { color: '#32B482' } : undefined]}>
                   {fmtAsymmetryPct(walkingAsymmetry)}
                 </Text>
               </View>
@@ -247,7 +245,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                     DST
                   </Text>
                 </TouchableOpacity>
-                <Text style={[styles.tableValue, walkingDST != null && walkingDST < 0.4 ? { color: '#FFB700' } : undefined]}>
+                <Text style={[styles.tableValue, walkingDST != null && walkingDST < 0.4 ? { color: '#32B482' } : undefined]}>
                   {fmtPct(walkingDST)}
                 </Text>
               </View>
