@@ -36,15 +36,6 @@ const getGaitStyle = (mph: number | null): string => {
   return 'trudging';
 };
 
-const GAIT_COLORS: Record<string, string> = {
-  powerful: '#BCB58D',
-  swaggering: '#2B54A0',
-  strutting: '#25A87F',
-  sauntering: '#B792F2',
-  moseying: '#C083A3',
-  trudging: '#575F74',
-};
-
 const BALANCE_COLORS: Record<string, string> = {
   excellent: '#32B482',
   good: '#006FFF',
@@ -146,11 +137,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             {ready ? formatNumber(todaySteps) : '--'}
           </Text>
           <Text style={styles.narrative}>{' steps today with a '}</Text>
-          <View style={[styles.gaitPill, ready && GAIT_COLORS[strideStyle] ? { backgroundColor: GAIT_COLORS[strideStyle] } : { backgroundColor: 'transparent' }]}>
-            <Text style={[styles.narrativeItalic, { color: ready ? '#FFFFFF' : colors.text }]}>
-              {ready ? strideStyle : '--'}
-            </Text>
-          </View>
+          <Text style={[styles.narrative, styles.narrativeBold, styles.narrativeItalic]}>
+            {ready ? strideStyle : '--'}
+          </Text>
           <Text style={styles.narrative}>{' stride and '}</Text>
           <Text style={[styles.narrative, styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
             {ready ? balanceStyle : 'excellent'}
@@ -278,7 +267,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           <Text style={styles.highlightGroupLabel}>
             {'Daily Step Goal: '}
             <Text style={styles.goalTap} onPress={handleEditGoal}>
-              {formatNumber(stepGoal)}
+              {formatNumber(stepGoal)} ✎
             </Text>
           </Text>
           <View style={styles.highlightRow}>
@@ -344,12 +333,6 @@ const styles = StyleSheet.create({
   narrativeItalic: {
     fontStyle: 'italic',
   },
-  gaitPill: {
-    borderRadius: 6,
-    paddingHorizontal: 2,
-    paddingVertical: 2,
-  },
-
   highlightRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -373,14 +356,8 @@ const styles = StyleSheet.create({
   goalTap: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-    borderRadius: 6,
-    backgroundColor: '#777777',
-    paddingHorizontal: 2,
-    paddingVertical: 2,
-    overflow: 'hidden',
+    color: colors.text,
+    textDecorationLine: 'underline',
   },
 
   // Chart
