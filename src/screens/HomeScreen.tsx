@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -59,6 +60,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [stepGoal, setStepGoal] = useState(10000);
 
+  useEffect(() => {
+    AsyncStorage.getItem('stepGoal').then((val) => {
+      if (val) setStepGoal(parseInt(val, 10));
+    });
+  }, []);
+
   const {
     todaySteps,
     chartData,
@@ -108,7 +115,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
       'Enter your step goal:',
       (value) => {
         const n = parseInt(value.replace(/,/g, ''), 10);
-        if (!isNaN(n) && n > 0) setStepGoal(n);
+        if (!isNaN(n) && n > 0) {
+          setStepGoal(n);
+          AsyncStorage.setItem('stepGoal', String(n));
+        }
       },
       'plain-text',
       String(stepGoal),
