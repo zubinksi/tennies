@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   goalTap: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.text,
+    color: '#32B482',
     textDecorationLine: 'underline',
   },
 
