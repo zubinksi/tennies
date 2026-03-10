@@ -252,24 +252,28 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   overlayLine: {
-    color: '#FFFFFF',
+    color: '#FF5900',
     fontSize: 18,
     lineHeight: 26,
+    fontFamily: 'Menlo',
   },
   overlayLabel: {
     fontWeight: '400',
-    color: 'rgba(255,255,255,0.75)',
+    color: '#FF5900',
+    fontFamily: 'Menlo',
   },
   overlayValue: {
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#FF5900',
+    fontFamily: 'Menlo',
   },
   overlayPowered: {
     marginTop: 8,
     fontSize: 11,
-    color: 'rgba(255,255,255,0.5)',
+    color: '#FF5900',
     fontWeight: '500',
     letterSpacing: 0.5,
+    fontFamily: 'Menlo',
   },
 
   // Bottom bar

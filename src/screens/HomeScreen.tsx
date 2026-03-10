@@ -155,7 +155,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
               {ready ? balanceStyle : 'excellent'}
             </Text>
             {' balance.'}
-            {goalAchieved ? ' Daily step goal achieved ⭐ -- very pedestrian!' : ''}
+            {goalAchieved ? ' Daily step goal achieved -- very pedestrian!' : ''}
             {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
           </Text>
         </View>
