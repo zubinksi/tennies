@@ -28,11 +28,12 @@ const TOOLTIPS: Record<string, string> = {
 
 const getGaitStyle = (mph: number | null): string => {
   if (mph == null) return '--';
-  if (mph >= 2.5) return 'powerful';
-  if (mph >= 2.0) return 'swaggering';
-  if (mph >= 1.5) return 'strutting';
-  if (mph >= 1.0) return 'sauntering';
-  if (mph >= 0.5) return 'moseying';
+  if (mph >= 4.5) return 'powerful';
+  if (mph >= 4.0) return 'brisk';
+  if (mph >= 3.5) return 'zippy';
+  if (mph >= 3.0) return 'moderate';
+  if (mph >= 2.5) return 'leisurely';
+  if (mph >= 2.0) return 'moseying';
   return 'trudging';
 };
 
@@ -86,6 +87,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
     v == null ? '--' : `${Math.round(v * 39.3701)} in`;
   const fmtPct = (v: number | null) =>
     v == null ? '--' : `${Math.round(v * 100)}%`;
+  const fmtAsymmetryPct = (v: number | null) =>
+    v == null ? '--' : `${(v * 100).toFixed(2)}%`;
 
   const ready = !isLoading && isAuthorized;
   const streakColor = ready && streak > 0 ? '#599a59' : colors.text;
@@ -140,7 +143,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           <Text style={[styles.narrative, styles.narrativeBold, styles.narrativeItalic]}>
             {ready ? strideStyle : '--'}
           </Text>
-          <Text style={styles.narrative}>{' stride and '}</Text>
+          <Text style={styles.narrative}>{' average stride of '}</Text>
+          <Text style={[styles.narrative, styles.narrativeBold]}>
+            {fmtSpeed(walkingSpeed)}
+          </Text>
+          <Text style={styles.narrative}>{' and '}</Text>
           <Text style={[styles.narrative, styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
             {ready ? balanceStyle : 'excellent'}
           </Text>
@@ -220,7 +227,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                     Asymmetry
                   </Text>
                 </TouchableOpacity>
-                <Text style={styles.tableValue}>{fmtPct(walkingAsymmetry)}</Text>
+                <Text style={[styles.tableValue, walkingAsymmetry != null && walkingAsymmetry < 0.025 ? { color: '#FFB700' } : undefined]}>
+                  {fmtAsymmetryPct(walkingAsymmetry)}
+                </Text>
               </View>
 
               {/* DST */}
@@ -238,7 +247,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                     DST
                   </Text>
                 </TouchableOpacity>
-                <Text style={styles.tableValue}>{fmtPct(walkingDST)}</Text>
+                <Text style={[styles.tableValue, walkingDST != null && walkingDST < 0.4 ? { color: '#FFB700' } : undefined]}>
+                  {fmtPct(walkingDST)}
+                </Text>
               </View>
 
               {openTooltip && TOOLTIPS[openTooltip] && (

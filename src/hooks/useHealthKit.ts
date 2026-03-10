@@ -205,7 +205,9 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
 
     const goal = stepGoalRef.current;
     let streak = 0;
-    const cursor = new Date(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const cursor = new Date(yesterday);
     while (true) {
       const key = cursor.toDateString();
       const steps = stepsByDate.get(key) ?? 0;
@@ -216,6 +218,7 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
         break;
       }
     }
+    if (todaySteps >= goal) streak++;
 
     const allTimeDays = [...stepsByDate.values()].filter((v) => v >= goal).length;
 
@@ -274,7 +277,9 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
     if (stepsByDate.size === 0) return;
     const today = startOfDay();
     let streak = 0;
-    const cursor = new Date(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const cursor = new Date(yesterday);
     while (true) {
       const key = cursor.toDateString();
       const steps = stepsByDate.get(key) ?? 0;
@@ -285,6 +290,8 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
         break;
       }
     }
+    const todayStepsVal = stepsByDate.get(today.toDateString()) ?? 0;
+    if (todayStepsVal >= stepGoal) streak++;
     const allTimeDays = [...stepsByDate.values()].filter((v) => v >= stepGoal).length;
     setData((prev) => ({ ...prev, streak, allTimeDays }));
   }, [stepGoal]);
