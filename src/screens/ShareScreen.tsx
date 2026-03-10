@@ -38,6 +38,16 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
 
   const { steps, strideStyle, balanceStyle } = narrativeParts;
 
+  const shareTextOnly = async () => {
+    try {
+      await Share.share({
+        message: `Steps: ${steps}\nStride: ${strideStyle}\nBalance: ${balanceStyle}\n\nPowered by Tennies`,
+      });
+    } catch (e) {
+      Alert.alert('Error', 'Could not share.');
+    }
+  };
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -95,6 +105,9 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
             </TouchableOpacity>
             <TouchableOpacity style={[styles.pickButton, styles.pickButtonSecondary]} onPress={pickImage}>
               <Text style={[styles.pickButtonText, styles.pickButtonTextSecondary]}>Choose from Library</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.pickButton, styles.pickButtonSecondary]} onPress={shareTextOnly}>
+              <Text style={[styles.pickButtonText, styles.pickButtonTextSecondary]}>Share without Photo</Text>
             </TouchableOpacity>
           </View>
         ) : (

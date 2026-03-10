@@ -4979,7 +4979,7 @@ function useAutoPlay({
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
-          }, 'Monthly Average'),
+          }, 'Average Steps'),
           React.createElement(Liveline, {
             data: monthlyChart.data,
             value: monthlyChart.value,

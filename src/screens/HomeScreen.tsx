@@ -345,9 +345,9 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   gaitPill: {
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderRadius: 6,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
 
   highlightRow: {
@@ -376,10 +376,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: '#777777',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
     overflow: 'hidden',
   },
 
