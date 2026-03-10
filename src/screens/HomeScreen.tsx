@@ -142,16 +142,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             {ready ? formatNumber(todaySteps) : '--'}
           </Text>
           <Text style={styles.narrative}>{' steps today with a '}</Text>
-          <Text style={[styles.narrative, styles.narrativeBold, styles.narrativeItalic]}>
+          <Text style={[styles.narrative, styles.narrativeItalic]}>
             {ready ? strideStyle : '--'}
           </Text>
           <Text style={styles.narrative}>{' average stride of '}</Text>
           <Text style={styles.narrative}>
-            {fmtSpeed(walkingSpeed)}{milePace != null ? ` (${milePace} min mile)` : ''}
+            {fmtSpeed(walkingSpeed)}
           </Text>
           <Text style={styles.narrative}>{' and '}</Text>
           <Text style={styles.narrative}>
-            <Text style={[styles.narrativeItalic, ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
+            <Text style={[ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined]}>
               {ready ? balanceStyle : 'excellent'}
             </Text>
             {' balance.'}
@@ -190,7 +190,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                     Walk Speed
                   </Text>
                 </TouchableOpacity>
-                <Text style={styles.tableValue}>{fmtSpeed(walkingSpeed)}</Text>
+                <Text style={styles.tableValue}>
+                  {fmtSpeed(walkingSpeed)}{milePace != null ? <Text style={styles.tableValueMuted}> ({milePace} min mile)</Text> : null}
+                </Text>
               </View>
 
               {/* Step Length */}
@@ -432,6 +434,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text,
+  },
+  tableValueMuted: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: colors.textMuted,
   },
   labelOpen: {
     color: '#f97316',
