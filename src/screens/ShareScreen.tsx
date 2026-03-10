@@ -118,18 +118,13 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
             {/* Narrative overlay */}
             <View style={styles.narrativeOverlay}>
               <Text style={styles.narrativeText}>
-                {'You\'ve taken '}
+                {'I\'ve taken '}
                 <Text style={styles.narrativeBold}>{steps}</Text>
                 {' steps today with a '}
                 <Text style={styles.narrativeItalic}>{strideStyle}</Text>
                 {' stride and '}
                 <Text style={styles.narrativeItalic}>{balanceStyle}</Text>
                 {' balance.'}
-                {aboveAvgSteps
-                  ? ` You are ${aboveAvgSteps} steps above your average for the month.`
-                  : nearAvg
-                  ? ' You are right around your average for the month.'
-                  : null}
               </Text>
             </View>
           </ViewShot>

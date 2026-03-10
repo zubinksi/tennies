@@ -146,7 +146,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             {ready ? formatNumber(todaySteps) : '--'}
           </Text>
           {' steps today with a '}
-          <Text style={[styles.narrativeItalic, ready && GAIT_COLORS[strideStyle] ? { color: '#FFFFFF', backgroundColor: GAIT_COLORS[strideStyle], borderRadius: 5, paddingHorizontal: 4, overflow: 'hidden' } : undefined]}>
+          <Text style={[styles.narrativeItalic, ready && GAIT_COLORS[strideStyle] ? { color: '#FFFFFF', backgroundColor: GAIT_COLORS[strideStyle], borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' } : undefined]}>
             {ready ? strideStyle : '--'}
           </Text>
           {' stride and '}
@@ -294,7 +294,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
 
         {/* Share Button */}
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareButtonText}>Share Today's Walk</Text>
+          <Text style={styles.shareButtonText}>Share Your Steps</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -363,10 +363,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#FFFFFF',
-    borderRadius: 5,
-    backgroundColor: '#2A2A2A',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
+    borderRadius: 12,
+    backgroundColor: '#777777',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     overflow: 'hidden',
   },
 
