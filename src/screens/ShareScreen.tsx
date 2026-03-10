@@ -50,11 +50,13 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
 
   const shareDate = formatShareDate();
   const capitalizedStride = capitalize(strideStyle);
+  const capitalizedBalance = capitalize(balanceStyle);
+  const summaryLine = `${steps} Steps. ${capitalizedStride} Stride. ${capitalizedBalance} Balance.`;
 
   const shareTextOnly = async () => {
     try {
       await Share.share({
-        message: `${shareDate}\n\n${steps} ${capitalizedStride} Steps\n\nPowered by Tennies`,
+        message: `${shareDate}\n\n${summaryLine}\n\nPowered by Tennies`,
       });
     } catch (e) {
       Alert.alert('Error', 'Could not share.');
@@ -138,7 +140,7 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
             {/* Stats overlay */}
             <View style={styles.narrativeOverlay}>
               <Text style={styles.overlayLine}>{shareDate}</Text>
-              <Text style={styles.overlayLine}>{steps} {capitalizedStride} Steps</Text>
+              <Text style={styles.overlayLine}>{summaryLine}</Text>
               <Text style={styles.overlayPowered}>Powered by Tennies</Text>
             </View>
           </ViewShot>
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     gap: 4,
   },
   overlayLine: {

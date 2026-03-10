@@ -99,7 +99,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
     v == null ? '--' : `${(v * 100).toFixed(2)}%`;
 
   const ready = !isLoading && isAuthorized;
-  const streakColor = ready && streak > 0 ? '#599a59' : colors.text;
+  const streakColor = ready && streak > 0 ? '#32B482' : colors.text;
 
   const goalAchieved = ready && todaySteps >= stepGoal;
   const aboveAvg = ready && todaySteps > averageSteps;
@@ -148,8 +148,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
         {/* Narrative sentence */}
         <View style={styles.narrativeWrap}>
           {goalAchieved && (
-            <Text style={[styles.narrative, { color: '#32B482', width: '100%' }]}>
-              Daily step goal achieved!
+            <Text style={[styles.narrative, { color: '#32B482' }]}>
+              {'Daily step goal achieved! '}
             </Text>
           )}
           <Text style={styles.narrative}>{'You\'ve taken '}</Text>
@@ -205,7 +205,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
                   </Text>
                 </TouchableOpacity>
                 <Text style={styles.tableValue}>
-                  {milePace != null ? <Text style={[styles.tableValueMuted, { color: '#FFFFFF' }]}>{milePace} min mile  </Text> : null}{fmtSpeed(walkingSpeed)}
+                  {milePace != null ? <Text style={[styles.tableValueMuted, { color: '#555555' }]}>{milePace} min mile  </Text> : null}{fmtSpeed(walkingSpeed)}
                 </Text>
               </View>
 
