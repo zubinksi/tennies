@@ -126,6 +126,44 @@ const getLatestWalkingMetric = (type: string): Promise<number | null> => {
   });
 };
 
+// Fetch today's samples for a walking metric and return the average value.
+const getTodayAverageWalkingMetric = (type: string, startOfToday: Date): Promise<number | null> => {
+  if (!AppleHealthKit || typeof AppleHealthKit.getSamples !== 'function') {
+    return Promise.resolve(null);
+  }
+  return new Promise((resolve) => {
+    try {
+      const opts = {
+        type,
+        startDate: startOfToday.toISOString(),
+        endDate: new Date().toISOString(),
+        ascending: true,
+      };
+      AppleHealthKit.getSamples(opts, (_err: any, res: any[]) => {
+        if (_err) {
+          console.log(`[HealthKit] getTodayAverage error for ${type}:`, JSON.stringify(_err));
+          resolve(null);
+          return;
+        }
+        if (!Array.isArray(res) || !res.length) {
+          console.log(`[HealthKit] getTodayAverage no data for ${type}`);
+          resolve(null);
+          return;
+        }
+        const values = res
+          .map((s: any) => s.quantity ?? s.value)
+          .filter((v: any): v is number => typeof v === 'number');
+        if (!values.length) { resolve(null); return; }
+        const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
+        console.log(`[HealthKit] getTodayAverage ${type} avg:`, avg, 'from', values.length, 'samples');
+        resolve(avg);
+      });
+    } catch {
+      resolve(null);
+    }
+  });
+};
+
 export const useHealthKit = (stepGoal: number = 10000): HealthData => {
   // Store raw daily steps so goal changes can recompute without re-fetching
   const stepsByDateRef = useRef<Map<string, number>>(new Map());
@@ -248,10 +286,10 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
 
     const [walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST] =
       await Promise.all([
-        getLatestWalkingMetric('WalkingSpeed'),
-        getLatestWalkingMetric('WalkingStepLength'),
+        getTodayAverageWalkingMetric('WalkingSpeed', today),
+        getTodayAverageWalkingMetric('WalkingStepLength', today),
         getLatestWalkingMetric('WalkingAsymmetryPercentage'),
-        getLatestWalkingMetric('WalkingDoubleSupportPercentage'),
+        getTodayAverageWalkingMetric('WalkingDoubleSupportPercentage', today),
       ]);
     console.log('[HealthKit] walking metrics:', { walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST });
 

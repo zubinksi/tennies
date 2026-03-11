@@ -150,6 +150,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           {goalAchieved && (
             <Text style={{ color: '#32B482' }}>{'Daily step goal achieved! '}</Text>
           )}
+          {!goalAchieved && ready && (
+            walkingDST != null && walkingDST > 0.4
+              ? <Text style={{ color: '#FF5900' }}>{'Focus on good posture. '}</Text>
+              : <Text style={{ color: '#006FFF' }}>{'Every step counts! '}</Text>
+          )}
           {'You\'ve taken '}
           <Text style={styles.narrativeBold}>
             {ready ? formatNumber(todaySteps) : '--'}

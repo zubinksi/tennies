@@ -66,7 +66,7 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
   const shareTextOnly = async () => {
     try {
       await Share.share({
-        message: `${shareDate}\n\n${summaryLine}\n\nPowered by Tennies`,
+        message: `${shareDate}\n\n${steps} Steps. \n${capitalizedStride} Stride. \n${capitalizedBalance} Balance.\n\nPowered by Tennies`,
       });
     } catch (e) {
       Alert.alert('Error', 'Could not share.');
