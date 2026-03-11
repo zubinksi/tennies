@@ -161,7 +161,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           {' stride of '}
           {fmtSpeed(walkingSpeed)}
           {' and '}
-          <Text style={[ready && BALANCE_COLORS[balanceStyle] ? { color: BALANCE_COLORS[balanceStyle] } : undefined, styles.narrativeItalic]}>
+          <Text style={styles.narrativeItalic}>
             {ready ? balanceStyle : 'excellent'}
           </Text>
           {' balance.'}
@@ -287,9 +287,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
         {/* 10K Streak — below chart */}
         <View style={styles.streakSection}>
           <Text style={styles.highlightGroupLabel}>
-            {'Daily Step Goal: '}
+            {'Set Your Daily Step Goal: '}
             <Text style={styles.goalTap} onPress={handleEditGoal}>
-              {formatNumber(stepGoal)} ✎
+              {formatNumber(stepGoal)}
             </Text>
           </Text>
           <View style={styles.highlightRow}>
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   goalTap: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#32B482',
+    color: '#555555',
   },
 
   // Chart
