@@ -27,4 +27,6 @@ npm ci
 
 echo "Installing CocoaPods dependencies..."
 cd "$CI_PRIMARY_REPOSITORY_PATH/ios"
-pod install
+# Remove cached Pods to avoid stale podspec version conflicts (e.g. fmt)
+rm -rf Pods
+pod install --no-repo-update
