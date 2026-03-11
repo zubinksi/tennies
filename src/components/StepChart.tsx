@@ -1,8 +1,21 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
-import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { ChartPoint } from '../hooks/useHealthKit';
 import { CHART_HTML } from '../chartHtml';
+
+// Defensive import — react-native-webview uses TurboModuleRegistry.getEnforcing
+// at module init, which throws if the native module is not linked. A static import
+// would crash the entire bundle before React mounts (blank screen, no error message).
+let WebView: any = null;
+try {
+  const mod = require('react-native-webview');
+  WebView = mod?.default ?? mod;
+} catch (_e) {
+  // Native module not available; chart will not render.
+}
+
+// WebViewMessageEvent type (only used for typing, safe to require separately)
+type WebViewMessageEvent = { nativeEvent: { data: string } };
 
 interface StepChartProps {
   data: ChartPoint[];
@@ -13,7 +26,7 @@ interface StepChartProps {
 }
 
 export const StepChart: React.FC<StepChartProps> = ({ data, value, monthlyData, stepGoal, loading }) => {
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<any>(null);
   const pendingRef = useRef<{ data: ChartPoint[]; value: number; monthlyData: ChartPoint[]; stepGoal: number } | null>(null);
   const isChartReadyRef = useRef(false);
 
@@ -54,15 +67,17 @@ export const StepChart: React.FC<StepChartProps> = ({ data, value, monthlyData, 
 
   return (
     <View style={styles.container}>
-      <WebView
-        ref={webViewRef}
-        source={{ html: CHART_HTML }}
-        style={styles.webView}
-        javaScriptEnabled
-        scrollEnabled={false}
-        originWhitelist={['*']}
-        onMessage={handleMessage}
-      />
+      {WebView ? (
+        <WebView
+          ref={webViewRef}
+          source={{ html: CHART_HTML }}
+          style={styles.webView}
+          javaScriptEnabled
+          scrollEnabled={false}
+          originWhitelist={['*']}
+          onMessage={handleMessage}
+        />
+      ) : null}
     </View>
   );
 };
