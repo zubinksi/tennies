@@ -12,8 +12,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import ViewShot from 'react-native-view-shot';
 import { colors, spacing } from '../theme';
+
+// Defensive import — react-native-view-shot uses TurboModuleRegistry.getEnforcing
+// which throws at module init if the native module isn't linked. Wrapping in try/catch
+// prevents a blank screen crash and gracefully degrades image capture.
+let ViewShot: any = null;
+try {
+  const mod = require('react-native-view-shot');
+  ViewShot = mod?.default ?? mod;
+} catch (_e) {
+  // Native module not available; image capture will be disabled.
+}
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.72;
@@ -42,7 +52,7 @@ const formatShareDate = (): string => {
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack }) => {
-  const captureRef = useRef<ViewShot>(null);
+  const captureRef = useRef<any>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
 
@@ -125,7 +135,7 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
               <Text style={[styles.pickButtonText, styles.pickButtonTextSecondary]}>Share without Photo</Text>
             </TouchableOpacity>
           </View>
-        ) : (
+        ) : ViewShot ? (
           /* Image + overlay inside ViewShot */
           <ViewShot
             ref={captureRef}
@@ -144,6 +154,20 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
               <Text style={styles.overlayPowered}>Powered by Tennies</Text>
             </View>
           </ViewShot>
+        ) : (
+          /* Fallback when ViewShot native module is not available */
+          <View style={[styles.captureArea, { alignItems: 'center', justifyContent: 'center' }]}>
+            <Image
+              source={{ uri: imageUri }}
+              style={StyleSheet.absoluteFill}
+              resizeMode="cover"
+            />
+            <View style={styles.narrativeOverlay}>
+              <Text style={styles.overlayLine}>{shareDate}</Text>
+              <Text style={styles.overlayLine}>{summaryLine}</Text>
+              <Text style={styles.overlayPowered}>Powered by Tennies</Text>
+            </View>
+          </View>
         )}
       </View>
 
