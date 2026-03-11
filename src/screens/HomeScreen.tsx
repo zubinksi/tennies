@@ -162,7 +162,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           {fmtSpeed(walkingSpeed)}
           {' and '}
           <Text style={styles.narrativeItalic}>
-            {ready ? balanceStyle : 'excellent'}
+            {ready ? balanceStyle : '--'}
           </Text>
           {' balance.'}
           {aboveAvg ? ` You are ${formatNumber(todaySteps - averageSteps)} steps above your average for the month.` : nearAvg ? ' You are right around your average for the month.' : ''}
