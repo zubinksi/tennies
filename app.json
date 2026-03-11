@@ -23,6 +23,9 @@
         "com.apple.developer.healthkit.access": []
       }
     },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "newArchEnabled": false,
     "plugins": [
       "./plugins/withExpoPlist",
