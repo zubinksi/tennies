@@ -11,6 +11,7 @@
     },
     "platforms": ["ios"],
     "ios": {
+      "jsEngine": "hermes",
       "supportsTablet": false,
       "bundleIdentifier": "com.tennies.app",
       "buildNumber": "1",
