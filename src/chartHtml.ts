@@ -10,8 +10,8 @@ export const CHART_HTML = `<!DOCTYPE html>
     body { background: #EBEBEB; overflow: hidden; }
     /* src/styles/Stepper.css */
 .pasito-container {
-  --pill-dot-size: 11px;
-  --pill-active-width: 30px;
+  --pill-dot-size: 8px;
+  --pill-active-width: 24px;
   --pill-gap: 6px;
   --pill-duration: 500ms;
   --pill-easing: cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -4937,13 +4937,13 @@ function useAutoPlay({
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
-          }, "Today's Steps"),
+          }, null),
           React.createElement(Liveline, {
             data: todayChart.data,
             value: todayChart.value,
             loading: todayChart.loading,
             theme: 'light',
-            color: '#32B482',
+            color: '#000000',
             window: todayChart.window,
             grid: true,
             fill: true,
@@ -4975,7 +4975,7 @@ function useAutoPlay({
               position: 'absolute', top: '10px', left: '14px',
               fontSize: '11px', fontWeight: '500',
               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-              color: '#32B482', zIndex: 10,
+              color: '#000000', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
@@ -4985,7 +4985,7 @@ function useAutoPlay({
             value: monthlyChart.value,
             loading: monthlyChart.loading,
             theme: 'light',
-            color: '#32B482',
+            color: '#000000',
             window: monthlyChart.window,
             grid: true,
             fill: true,
