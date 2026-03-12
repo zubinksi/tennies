@@ -21,6 +21,10 @@ echo "Node: $(node --version), npm: $(npm --version)"
 # Export NODE_BINARY so Podfile can find node
 export NODE_BINARY=$(command -v node)
 
+# Write node path to .xcode.env.local so the build phase picks it up
+echo "export NODE_BINARY=$(command -v node)" > "$CI_PRIMARY_REPOSITORY_PATH/ios/.xcode.env.local"
+echo "Wrote NODE_BINARY=$(command -v node) to .xcode.env.local"
+
 echo "Installing npm dependencies..."
 cd "$CI_PRIMARY_REPOSITORY_PATH"
 npm ci
