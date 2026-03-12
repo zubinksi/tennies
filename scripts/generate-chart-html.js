@@ -128,13 +128,13 @@ const chartScript = `
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
-          }, "Today's Steps"),
+          }, null),
           React.createElement(Liveline, {
             data: todayChart.data,
             value: todayChart.value,
             loading: todayChart.loading,
             theme: 'light',
-            color: '#32B482',
+            color: '#000000',
             window: todayChart.window,
             grid: true,
             fill: true,
@@ -166,7 +166,7 @@ const chartScript = `
               position: 'absolute', top: '10px', left: '14px',
               fontSize: '11px', fontWeight: '500',
               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-              color: '#32B482', zIndex: 10,
+              color: '#000000', zIndex: 10,
               pointerEvents: 'none', letterSpacing: '0.02em',
               paddingBottom: '16px',
             }
@@ -176,7 +176,7 @@ const chartScript = `
             value: monthlyChart.value,
             loading: monthlyChart.loading,
             theme: 'light',
-            color: '#32B482',
+            color: '#000000',
             window: monthlyChart.window,
             grid: true,
             fill: true,
