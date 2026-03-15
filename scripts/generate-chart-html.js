@@ -224,10 +224,11 @@ const html = `<!DOCTYPE html>
     body { background: #EBEBEB; overflow: hidden; }
     ${pasitoCss}
     .tennies-stepper {
+      --pill-dot-size: 16px;
       --pill-active-bg: rgba(0, 0, 0, 0.7);
       --pill-bg: rgba(0, 0, 0, 0.18);
-      --pill-container-bg: rgba(0, 0, 0, 0.05);
-      --pill-container-border: rgba(0, 0, 0, 0.1);
+      --pill-container-bg: transparent;
+      --pill-container-border: transparent;
     }
   </style>
 </head>

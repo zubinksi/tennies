@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StepChart } from '../components/StepChart';
@@ -144,7 +145,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
         showsVerticalScrollIndicator={false}
       >
         {/* Wordmark */}
-        <Text style={styles.wordmark}>TENNIES</Text>
+        <Image source={require('../../lilguys.png')} style={styles.wordmark} resizeMode="contain" />
 
         {/* Narrative sentence */}
         <Text style={[styles.narrative, styles.narrativeWrap]}>
@@ -335,10 +336,7 @@ const styles = StyleSheet.create({
 
   // Wordmark
   wordmark: {
-    fontSize: 20,
-    fontWeight: '700',
-    fontFamily: 'Menlo',
-    color: colors.text,
+    width: '100%',
     marginBottom: spacing.sm,
   },
 
@@ -347,10 +345,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   narrative: {
-    fontSize: 21,
+    fontSize: 26,
     fontWeight: '400',
     color: colors.text,
-    lineHeight: 28,
+    lineHeight: 35,
   },
   narrativeBold: {
     fontWeight: '700',
@@ -432,10 +430,15 @@ const styles = StyleSheet.create({
   },
   advancedCard: {
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: '#FFFFFF',
     borderRadius: 15,
     padding: spacing.md,
     gap: spacing.sm,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.18,
+    shadowRadius: 2.5,
+    elevation: 2,
   },
   tableRow: {
     flexDirection: 'row',
