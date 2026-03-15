@@ -22,6 +22,7 @@ export interface HealthData {
   averageSteps: number;
   streak: number;
   allTimeDays: number;
+  last30Days: number;
   walkingSpeed: number | null;     // m/s from HealthKit
   walkingStepLength: number | null; // meters from HealthKit
   walkingAsymmetry: number | null;  // percentage (0–100)
@@ -176,6 +177,7 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
     averageSteps: 0,
     streak: 0,
     allTimeDays: 0,
+    last30Days: 0,
     walkingSpeed: null,
     walkingStepLength: null,
     walkingAsymmetry: null,
@@ -260,6 +262,11 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
 
     const allTimeDays = [...stepsByDate.values()].filter((v) => v >= goal).length;
 
+    const last30Days = [...stepsByDate.entries()].filter(([k, v]) => {
+      const d = new Date(k);
+      return d >= thirtyDaysAgo && v >= goal;
+    }).length;
+
     // Monthly average daily steps for the last 12 months
     const monthlyChartData: ChartPoint[] = [];
     for (let i = 11; i >= 0; i--) {
@@ -300,6 +307,7 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
       averageSteps,
       streak,
       allTimeDays,
+      last30Days,
       walkingSpeed,
       walkingStepLength,
       walkingAsymmetry,
@@ -331,7 +339,13 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
     const todayStepsVal = stepsByDate.get(today.toDateString()) ?? 0;
     if (todayStepsVal >= stepGoal) streak++;
     const allTimeDays = [...stepsByDate.values()].filter((v) => v >= stepGoal).length;
-    setData((prev) => ({ ...prev, streak, allTimeDays }));
+    const thirtyDaysAgoGoal = new Date(today);
+    thirtyDaysAgoGoal.setDate(thirtyDaysAgoGoal.getDate() - 30);
+    const last30Days = [...stepsByDate.entries()].filter(([k, v]) => {
+      const d = new Date(k);
+      return d >= thirtyDaysAgoGoal && v >= stepGoal;
+    }).length;
+    setData((prev) => ({ ...prev, streak, allTimeDays, last30Days }));
   }, [stepGoal]);
 
   useEffect(() => {

@@ -73,6 +73,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
     averageSteps,
     streak,
     allTimeDays,
+    last30Days,
     walkingSpeed,
     walkingStepLength,
     walkingAsymmetry,
@@ -304,9 +305,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
             </Text>
           </View>
           <View style={styles.highlightRow}>
-            <Text style={styles.highlightNormal}>All Time</Text>
+            <Text style={styles.highlightNormal}>Last 30d</Text>
             <Text style={styles.highlightNormal}>
-              {ready ? formatNumber(allTimeDays) : '--'}
+              {ready ? formatNumber(last30Days) : '--'}
             </Text>
           </View>
         </View>
@@ -346,10 +347,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   narrative: {
-    fontSize: 17,
+    fontSize: 21,
     fontWeight: '400',
     color: colors.text,
-    lineHeight: 22,
+    lineHeight: 28,
   },
   narrativeBold: {
     fontWeight: '700',
@@ -389,6 +390,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFFFFF',
     borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.18,
+    shadowRadius: 2.5,
+    elevation: 2,
   },
 
   errorText: {
@@ -425,7 +432,7 @@ const styles = StyleSheet.create({
   },
   advancedCard: {
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: 'transparent',
     borderRadius: 15,
     padding: spacing.md,
     gap: spacing.sm,
