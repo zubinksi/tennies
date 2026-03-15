@@ -57,7 +57,7 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => {
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
-  const [advancedExpanded, setAdvancedExpanded] = useState(true);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [stepGoal, setStepGoal] = useState(10000);
 
   useEffect(() => {
