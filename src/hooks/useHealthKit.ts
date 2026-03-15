@@ -15,6 +15,11 @@ export interface ChartPoint {
   value: number; // cumulative steps at this moment
 }
 
+export interface DayRecord {
+  date: string;   // human-readable e.g. "Mon Mar 15 2026"
+  steps: number;
+}
+
 export interface HealthData {
   todaySteps: number;
   chartData: ChartPoint[];
@@ -23,6 +28,7 @@ export interface HealthData {
   streak: number;
   allTimeDays: number;
   last30Days: number;
+  topDays: DayRecord[];            // top 10 days sorted by steps desc
   walkingSpeed: number | null;     // m/s from HealthKit
   walkingStepLength: number | null; // meters from HealthKit
   walkingAsymmetry: number | null;  // percentage (0–100)
@@ -178,6 +184,7 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
     streak: 0,
     allTimeDays: 0,
     last30Days: 0,
+    topDays: [],
     walkingSpeed: null,
     walkingStepLength: null,
     walkingAsymmetry: null,
@@ -291,6 +298,11 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
       }
     }
 
+    const topDays: DayRecord[] = [...stepsByDate.entries()]
+      .map(([date, steps]) => ({ date, steps }))
+      .sort((a, b) => b.steps - a.steps)
+      .slice(0, 10);
+
     const [walkingSpeed, walkingStepLength, walkingAsymmetry, walkingDST] =
       await Promise.all([
         getTodayAverageWalkingMetric('WalkingSpeed', today),
@@ -308,6 +320,7 @@ export const useHealthKit = (stepGoal: number = 10000): HealthData => {
       streak,
       allTimeDays,
       last30Days,
+      topDays,
       walkingSpeed,
       walkingStepLength,
       walkingAsymmetry,

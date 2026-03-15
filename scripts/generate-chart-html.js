@@ -225,6 +225,7 @@ const html = `<!DOCTYPE html>
     ${pasitoCss}
     .tennies-stepper {
       --pill-dot-size: 16px;
+      --pill-active-width: 36px;
       --pill-active-bg: rgba(0, 0, 0, 0.7);
       --pill-bg: rgba(0, 0, 0, 0.18);
       --pill-container-bg: transparent;

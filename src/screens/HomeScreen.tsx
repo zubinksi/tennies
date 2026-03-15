@@ -13,8 +13,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StepChart } from '../components/StepChart';
 import { useHealthKit } from '../hooks/useHealthKit';
 import { colors, spacing } from '../theme';
-import { NarrativeParts } from './ShareScreen';
-
 const formatNumber = (n: number): string => n.toLocaleString('en-US');
 
 const TOOLTIPS: Record<string, string> = {
@@ -52,11 +50,7 @@ const getBalanceStyle = (dst: number | null): string => {
   return 'okay';
 };
 
-interface HomeScreenProps {
-  onNavigateToShare: (parts: NarrativeParts) => void;
-}
-
-export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => {
+export const HomeScreen: React.FC = () => {
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [stepGoal, setStepGoal] = useState(10000);
@@ -128,18 +122,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
     );
   };
 
-  const handleShare = () => {
-    onNavigateToShare({
-      steps: ready ? formatNumber(todaySteps) : '--',
-      strideStyle: ready ? strideStyle : '--',
-      balanceStyle: ready ? balanceStyle : 'excellent',
-      aboveAvgSteps: aboveAvg ? formatNumber(todaySteps - averageSteps) : null,
-      nearAvg,
-    });
-  };
-
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -313,10 +297,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToShare }) => 
           </View>
         </View>
 
-        {/* Share Button */}
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareButtonText}>Share Your Steps</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -331,13 +311,13 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.lg,
     paddingRight: spacing.lg,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xxl,
   },
 
   // Wordmark
   wordmark: {
     width: '100%',
-    marginBottom: spacing.sm,
+    marginBottom: 2,
   },
 
   // Narrative
@@ -429,16 +409,10 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   advancedCard: {
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
     borderRadius: 15,
     padding: spacing.md,
     gap: spacing.sm,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
-    shadowRadius: 2.5,
-    elevation: 2,
+    backgroundColor: '#EBEBEB',
   },
   tableRow: {
     flexDirection: 'row',
@@ -474,20 +448,4 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // Share button
-  shareButton: {
-    marginTop: spacing.xs,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 5,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-  },
-  shareButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text,
-  },
 });

@@ -20,6 +20,9 @@
       "infoPlist": {
         "NSHealthShareUsageDescription": "Tennies reads your step count and walking metrics (speed, step length, asymmetry, and double support time) to track your daily progress and pedestrian performance.",
         "NSHealthUpdateUsageDescription": "Tennies needs HealthKit write access to log your activity.",
+        "NSMicrophoneUsageDescription": "Tennies uses the microphone to record voice memos during your walk.",
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true,
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
@@ -33,6 +36,12 @@
     "newArchEnabled": false,
     "plugins": [
       "./plugins/withExpoPlist",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Tennies uses the microphone to record voice memos during your walk."
+        }
+      ],
       [
         "react-native-health",
         {
