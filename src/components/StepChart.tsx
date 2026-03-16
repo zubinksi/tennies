@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     height: 280,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#EBEBEB',
+    backgroundColor: '#D8D8D8',
   },
   webView: {
     flex: 1,
