@@ -10,8 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHealthKit } from '../hooks/useHealthKit';
 import { colors, spacing } from '../theme';
 
-const formatNumber = (n: number): string => n.toLocaleString('en-US');
-
 const formatDate = (dateStr: string): string => {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-US', {
@@ -27,11 +25,19 @@ export const StatsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      {/* Fixed Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>TENNIES</Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Your Most Pedestrian Days</Text>
+        {/* Large spacer below header */}
+        <View style={styles.headerBreak} />
+
+        <Text style={styles.title}>YOUR MOST PEDESTRIAN DAYS</Text>
 
         {isLoading && (
           <ActivityIndicator size="large" color={colors.textMuted} style={styles.loader} />
@@ -54,7 +60,7 @@ export const StatsScreen: React.FC = () => {
             </View>
             <View style={styles.info}>
               <Text style={styles.date}>{formatDate(day.date)}</Text>
-              <Text style={styles.steps}>{formatNumber(day.steps)} steps</Text>
+              <Text style={styles.steps}>{Math.round(day.steps).toLocaleString('en-US')} steps</Text>
             </View>
           </View>
         ))}
@@ -68,22 +74,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#EBEBEB',
   },
+
+  // Fixed header
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    backgroundColor: '#EBEBEB',
+  },
+  headerTitle: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.textMuted,
+    letterSpacing: 0,
+  },
+
   container: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
+
+  // Large spacer below header
+  headerBreak: {
+    height: 80,
+  },
+
   title: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: colors.text,
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.textMuted,
     marginBottom: spacing.lg,
-    lineHeight: 32,
   },
   loader: {
     marginTop: spacing.xl,
   },
   empty: {
+    fontFamily: 'Menlo',
     fontSize: 15,
     color: colors.textMuted,
     lineHeight: 22,
@@ -101,8 +129,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rank: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
     color: colors.textMuted,
   },
   info: {
@@ -110,13 +139,17 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   date: {
+    fontFamily: 'Menlo',
     fontSize: 14,
     fontWeight: '400',
     color: colors.textMuted,
+    fontStyle: 'italic',
   },
   steps: {
+    fontFamily: 'Menlo',
     fontSize: 18,
     fontWeight: '700',
     color: colors.text,
+    fontStyle: 'italic',
   },
 });

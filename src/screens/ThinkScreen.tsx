@@ -73,6 +73,10 @@ export const ThinkScreen: React.FC = () => {
   const meteringRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const barQueueRef = useRef<number[]>(Array(NUM_BARS).fill(0.05));
 
+  // Blinking animation for recording indicator
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+  const blinkAnimRef = useRef<Animated.CompositeAnimation | null>(null);
+
   // Load saved recordings
   useEffect(() => {
     AsyncStorage.getItem(RECORDINGS_KEY).then((raw) => {
@@ -83,6 +87,25 @@ export const ThinkScreen: React.FC = () => {
       }
     });
   }, []);
+
+  // Start/stop blink animation
+  useEffect(() => {
+    if (isRecording) {
+      blinkAnimRef.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(blinkAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+          Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ]),
+      );
+      blinkAnimRef.current.start();
+    } else {
+      if (blinkAnimRef.current) {
+        blinkAnimRef.current.stop();
+        blinkAnimRef.current = null;
+      }
+      blinkAnim.setValue(1);
+    }
+  }, [isRecording]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -312,23 +335,49 @@ export const ThinkScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      {/* Fixed Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>TENNIES</Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* Quotes */}
+        {/* Large spacer below header */}
+        <View style={styles.headerBreak} />
+
+        {/* RECORD YOUR THOUGHTS label */}
+        <Text style={styles.sectionLabel}>RECORD YOUR THOUGHTS</Text>
+
+        {/* Quote */}
         <Text style={styles.quote}>
-          {'"If you are seeking creative ideas, go out walking. Angels whisper to a man when he goes for a walk."'}
-          {'  ~ Raymond Carver'}
-        </Text>
-        <Text style={styles.quote}>
-          {'"All truly great thoughts are conceived by walking"'}
-          {'  ~ Friedrich Nietzsche'}
+          {'"Angels whisper to a man when he goes for a walk" - Raymond Carver'}
         </Text>
 
         {/* Recorder card */}
         <View style={styles.recorderCard}>
-          {/* Waveform */}
+          {/* Top row: indicator + RECORDING label (left), timer (right) */}
+          <View style={styles.recorderTopRow}>
+            <View style={styles.recordingIndicatorRow}>
+              <Animated.View
+                style={[
+                  styles.recordingDot,
+                  isRecording
+                    ? { backgroundColor: '#FF7E7E', opacity: blinkAnim }
+                    : { backgroundColor: '#555555', opacity: 1 },
+                ]}
+              />
+              {isRecording && (
+                <Text style={styles.recordingLabel}>RECORDING</Text>
+              )}
+            </View>
+            <Text style={styles.timerText}>
+              {formatDuration(isRecording ? recordingMs : 0)}
+            </Text>
+          </View>
+
+          {/* Waveform centered */}
           <View style={styles.waveform}>
             {barHeights.map((anim, i) => (
               <Animated.View
@@ -350,35 +399,29 @@ export const ThinkScreen: React.FC = () => {
             ))}
           </View>
 
-          {/* Timer */}
-          <Text style={styles.timer}>
-            {formatDuration(isRecording ? recordingMs : 0)}
-          </Text>
-
-          {/* Record / Stop button */}
-          <TouchableOpacity
-            style={[styles.recordButton, isRecording && styles.recordButtonActive]}
-            onPress={isRecording ? stopRecording : startRecording}
-            activeOpacity={0.75}
-          >
-            {isRecording ? (
-              <View style={styles.stopIcon} />
-            ) : (
-              <View style={styles.micIcon}>
-                <Ionicons name="mic" size={28} color="#FFFFFF" />
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <Text style={styles.recordLabel}>
-            {isRecording ? 'Tap to stop' : 'Tap to record'}
-          </Text>
+          {/* Bottom left: START/STOP button */}
+          <View style={styles.recorderBottomRow}>
+            <TouchableOpacity
+              style={styles.startStopButton}
+              onPress={isRecording ? stopRecording : startRecording}
+              activeOpacity={0.75}
+            >
+              {isRecording ? (
+                <View style={styles.stopSquare} />
+              ) : (
+                <View style={styles.playTriangle} />
+              )}
+              <Text style={styles.startStopLabel}>
+                {isRecording ? 'STOP' : 'START'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Saved recordings */}
         {savedRecordings.length > 0 && (
           <View style={styles.savedSection}>
-            <Text style={styles.savedTitle}>Saved Memos</Text>
+            <Text style={styles.savedTitle}>SAVED MEMOS</Text>
             {savedRecordings.map((meta) => {
               const isPlaying = playingId === meta.id;
               const progress = isPlaying ? playbackMs / meta.durationMs : 0;
@@ -449,35 +492,93 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#EBEBEB',
   },
-  container: {
+
+  // Fixed header
+  header: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    backgroundColor: '#EBEBEB',
+  },
+  headerTitle: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.textMuted,
+    letterSpacing: 0,
   },
 
-  // Quotes
-  quote: {
-    fontSize: 14,
-    fontStyle: 'italic',
+  container: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+
+  // Large spacer below header
+  headerBreak: {
+    height: 80,
+  },
+
+  // Section label
+  sectionLabel: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
     color: colors.textMuted,
-    lineHeight: 21,
+    marginBottom: 8,
+  },
+
+  // Quote
+  quote: {
+    fontSize: 19,
+    fontStyle: 'italic',
+    color: '#000000',
+    lineHeight: 27,
+    marginBottom: spacing.lg,
   },
 
   // Recorder card
   recorderCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#D8D8D8',
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
     padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.md,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowOpacity: 0.18,
+    shadowRadius: 2.5,
     elevation: 2,
-    marginTop: spacing.sm,
+    gap: spacing.md,
   },
+
+  // Top row of recorder card
+  recorderTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  recordingIndicatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  recordingDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+  },
+  recordingLabel: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    color: colors.textMuted,
+  },
+  timerText: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    color: colors.textMuted,
+  },
+
+  // Waveform
   waveform: {
     width: '100%',
     height: 64,
@@ -490,62 +591,55 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     minHeight: 3,
   },
-  timer: {
-    fontSize: 36,
-    fontWeight: '300',
-    color: colors.text,
-    fontVariant: ['tabular-nums'],
-    letterSpacing: 2,
-  },
-  recordButton: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.text,
+
+  // Bottom row of recorder card
+  recorderBottomRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  recordButtonActive: {
-    backgroundColor: '#FF3B30',
-  },
-  micIcon: {
+  startStopButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 8,
   },
-  stopIcon: {
-    width: 22,
-    height: 22,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 4,
+  playTriangle: {
+    width: 0,
+    height: 0,
+    borderTopWidth: 8,
+    borderBottomWidth: 8,
+    borderLeftWidth: 14,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: colors.textMuted,
   },
-  recordLabel: {
-    fontSize: 12,
-    fontWeight: '400',
+  stopSquare: {
+    width: 14,
+    height: 14,
+    backgroundColor: colors.textMuted,
+    borderRadius: 2,
+  },
+  startStopLabel: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
     color: colors.textMuted,
   },
 
   // Saved recordings
   savedSection: {
     gap: spacing.sm,
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
   },
   savedTitle: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
     color: colors.textMuted,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
   },
   memoCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EBEBEB',
     borderRadius: 12,
     padding: spacing.md,
     gap: spacing.xs,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 1,
   },
   memoHeader: {
     flexDirection: 'row',

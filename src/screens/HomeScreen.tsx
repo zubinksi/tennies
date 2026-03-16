@@ -56,6 +56,7 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
 export const HomeScreen: React.FC = () => {
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [stepGoal, setStepGoal] = useState(10000);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem('stepGoal').then((val) => {
@@ -175,80 +176,92 @@ export const HomeScreen: React.FC = () => {
         {/* Break */}
         <View style={styles.sectionBreak} />
 
-        {/* DETAILS + label */}
-        <Text style={styles.sectionLabel}>DETAILS +</Text>
+        {/* DETAILS dropdown toggle */}
+        <TouchableOpacity onPress={() => setDetailsOpen((prev) => !prev)}>
+          <Text style={styles.sectionLabel}>{detailsOpen ? 'DETAILS -' : 'DETAILS +'}</Text>
+        </TouchableOpacity>
 
-        {/* Detail rows — always visible, no card */}
-        <View style={styles.detailRows}>
-          {/* Walk Speed */}
-          <View style={styles.tableRow}>
-            <TouchableOpacity
-              onPress={() => toggle('speed')}
-              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            >
-              <Text style={[styles.tableLabel, openTooltip === 'speed' && styles.labelOpen]}>
-                WALK SPEED
+        {/* Detail rows — collapsed by default */}
+        {detailsOpen && (
+          <View style={styles.detailRows}>
+            {/* Walk Speed */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('speed')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text style={[styles.tableLabel, openTooltip === 'speed' && styles.labelOpen]}>
+                  WALK SPEED
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.tableValue}>{fmtSpeed(walkingSpeed)}</Text>
+            </View>
+
+            {/* Step Length */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('stepLength')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text style={[styles.tableLabel, openTooltip === 'stepLength' && styles.labelOpen]}>
+                  STEP LENGTH
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.tableValue}>{fmtLength(walkingStepLength)}</Text>
+            </View>
+
+            {/* Asymmetry */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('asymmetry')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text style={[styles.tableLabel, openTooltip === 'asymmetry' && styles.labelOpen]}>
+                  ASYMMETRY
+                </Text>
+              </TouchableOpacity>
+              <Text style={[styles.tableValue, walkingAsymmetry != null && walkingAsymmetry < 0.025 ? { color: '#32B482' } : undefined]}>
+                {fmtAsymmetryPct(walkingAsymmetry)}
               </Text>
-            </TouchableOpacity>
-            <Text style={styles.tableValue}>{fmtSpeed(walkingSpeed)}</Text>
-          </View>
+            </View>
 
-          {/* Step Length */}
-          <View style={styles.tableRow}>
-            <TouchableOpacity
-              onPress={() => toggle('stepLength')}
-              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            >
-              <Text style={[styles.tableLabel, openTooltip === 'stepLength' && styles.labelOpen]}>
-                STEP LENGTH
+            {/* DST */}
+            <View style={styles.tableRow}>
+              <TouchableOpacity
+                onPress={() => toggle('dst')}
+                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              >
+                <Text style={[styles.tableLabel, openTooltip === 'dst' && styles.labelOpen]}>
+                  DST
+                </Text>
+              </TouchableOpacity>
+              <Text style={[styles.tableValue, walkingDST != null && walkingDST < 0.4 ? { color: '#32B482' } : undefined]}>
+                {fmtPct(walkingDST)}
               </Text>
-            </TouchableOpacity>
-            <Text style={styles.tableValue}>{fmtLength(walkingStepLength)}</Text>
-          </View>
+            </View>
 
-          {/* Asymmetry */}
-          <View style={styles.tableRow}>
-            <TouchableOpacity
-              onPress={() => toggle('asymmetry')}
-              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            >
-              <Text style={[styles.tableLabel, openTooltip === 'asymmetry' && styles.labelOpen]}>
-                ASYMMETRY
-              </Text>
-            </TouchableOpacity>
-            <Text style={[styles.tableValue, walkingAsymmetry != null && walkingAsymmetry < 0.025 ? { color: '#32B482' } : undefined]}>
-              {fmtAsymmetryPct(walkingAsymmetry)}
-            </Text>
+            {openTooltip && TOOLTIPS[openTooltip] && (
+              <Text style={styles.tooltipText}>{TOOLTIPS[openTooltip]}</Text>
+            )}
           </View>
+        )}
 
-          {/* DST */}
-          <View style={styles.tableRow}>
-            <TouchableOpacity
-              onPress={() => toggle('dst')}
-              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            >
-              <Text style={[styles.tableLabel, openTooltip === 'dst' && styles.labelOpen]}>
-                DST
-              </Text>
-            </TouchableOpacity>
-            <Text style={[styles.tableValue, walkingDST != null && walkingDST < 0.4 ? { color: '#32B482' } : undefined]}>
-              {fmtPct(walkingDST)}
-            </Text>
-          </View>
+        {/* Break */}
+        <View style={styles.sectionBreak} />
 
-          {openTooltip && TOOLTIPS[openTooltip] && (
-            <Text style={styles.tooltipText}>{TOOLTIPS[openTooltip]}</Text>
-          )}
+        {/* Chart — above goal section */}
+        <View style={styles.chartWrapper}>
+          <StepChart data={chartData} value={todaySteps} monthlyData={monthlyChartData} stepGoal={stepGoal} loading={isLoading} />
         </View>
 
         {/* Break */}
         <View style={styles.sectionBreak} />
 
-        {/* Goal section — above chart */}
+        {/* Goal section — below chart */}
         <View style={styles.goalSection}>
           <TouchableOpacity onPress={handleEditGoal}>
             <Text style={styles.sectionLabel}>
-              {'DAILY GOAL: '}{formatNumber(stepGoal)}
+              {'DAILY GOAL '}{formatNumber(stepGoal)}
             </Text>
           </TouchableOpacity>
           <View style={styles.highlightRow}>
@@ -263,11 +276,6 @@ export const HomeScreen: React.FC = () => {
               {ready ? formatNumber(last30Days) : '--'}
             </Text>
           </View>
-        </View>
-
-        {/* Chart — directly underneath goal, no break */}
-        <View style={styles.chartWrapper}>
-          <StepChart data={chartData} value={todaySteps} monthlyData={monthlyChartData} stepGoal={stepGoal} loading={isLoading} />
         </View>
 
         {/* Error state */}
@@ -326,10 +334,10 @@ const styles = StyleSheet.create({
 
   // Narrative
   narrative: {
-    fontSize: 21,
+    fontSize: 19,
     fontWeight: '400',
     color: colors.text,
-    lineHeight: 29,
+    lineHeight: 27,
     marginBottom: 0,
   },
   narrativeBold: {
@@ -344,7 +352,7 @@ const styles = StyleSheet.create({
     height: spacing.lg,
   },
 
-  // Section label (DETAILS +, DAILY GOAL:)
+  // Section label (DETAILS +/-, DAILY GOAL:)
   sectionLabel: {
     fontFamily: 'Menlo',
     fontSize: 15,
@@ -353,9 +361,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  // Detail rows (always visible)
+  // Detail rows
   detailRows: {
     gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   tableRow: {
     flexDirection: 'row',
