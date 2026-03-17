@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useHealthKit } from '../hooks/useHealthKit';
 import { colors, spacing } from '../theme';
+
+const formatNumber = (n: number): string => n.toLocaleString('en-US');
 
 const formatDate = (dateStr: string): string => {
   const d = new Date(dateStr);
@@ -21,7 +26,35 @@ const formatDate = (dateStr: string): string => {
 };
 
 export const StatsScreen: React.FC = () => {
-  const { topDays, isLoading, isAuthorized } = useHealthKit();
+  const [stepGoal, setStepGoal] = useState(10000);
+
+  useEffect(() => {
+    AsyncStorage.getItem('stepGoal').then((val) => {
+      if (val) setStepGoal(parseInt(val, 10));
+    });
+  }, []);
+
+  const { topDays, streak, last30Days, isLoading, isAuthorized } = useHealthKit(stepGoal);
+
+  const ready = !isLoading && isAuthorized;
+  const streakColor = ready && streak > 0 ? '#32B482' : colors.text;
+
+  const handleEditGoal = () => {
+    Alert.prompt(
+      'Daily Step Goal',
+      'Enter your step goal:',
+      (value) => {
+        const n = parseInt(value.replace(/,/g, ''), 10);
+        if (!isNaN(n) && n > 0) {
+          setStepGoal(n);
+          AsyncStorage.setItem('stepGoal', String(n));
+        }
+      },
+      'plain-text',
+      String(stepGoal),
+      'number-pad',
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
@@ -36,6 +69,30 @@ export const StatsScreen: React.FC = () => {
       >
         {/* Large spacer below header */}
         <View style={styles.headerBreak} />
+
+        {/* Daily Goal section */}
+        <View style={styles.goalSection}>
+          <TouchableOpacity onPress={handleEditGoal}>
+            <Text style={styles.sectionLabel}>
+              {'DAILY GOAL '}{formatNumber(stepGoal)}
+            </Text>
+          </TouchableOpacity>
+          <View style={styles.highlightRow}>
+            <Text style={styles.metricLabel}>CURRENT STREAK</Text>
+            <Text style={[styles.metricValue, { color: streakColor }]}>
+              {ready ? String(streak) : '--'}
+            </Text>
+          </View>
+          <View style={styles.highlightRow}>
+            <Text style={styles.metricLabel}>LAST 30D</Text>
+            <Text style={styles.metricValue}>
+              {ready ? formatNumber(last30Days) : '--'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Section break */}
+        <View style={styles.sectionBreak} />
 
         <Text style={styles.title}>YOUR MOST PEDESTRIAN DAYS</Text>
 
@@ -97,7 +154,41 @@ const styles = StyleSheet.create({
 
   // Large spacer below header
   headerBreak: {
-    height: 80,
+    height: 120,
+  },
+
+  // Goal section
+  goalSection: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  sectionLabel: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.textMuted,
+    marginBottom: 4,
+  },
+  highlightRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  metricLabel: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.text,
+  },
+  metricValue: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.text,
+  },
+
+  // Section break
+  sectionBreak: {
+    height: spacing.lg,
   },
 
   title: {

@@ -6,7 +6,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StepChart } from '../components/StepChart';
@@ -69,9 +68,6 @@ export const HomeScreen: React.FC = () => {
     chartData,
     monthlyChartData,
     averageSteps,
-    streak,
-    allTimeDays,
-    last30Days,
     walkingSpeed,
     walkingStepLength,
     walkingAsymmetry,
@@ -98,7 +94,6 @@ export const HomeScreen: React.FC = () => {
     v == null ? '--' : `${(v * 100).toFixed(2)}%`;
 
   const ready = !isLoading && isAuthorized;
-  const streakColor = ready && streak > 0 ? '#32B482' : colors.text;
 
   const goalAchieved = ready && todaySteps >= stepGoal;
   const aboveAvg = ready && todaySteps > averageSteps;
@@ -107,23 +102,6 @@ export const HomeScreen: React.FC = () => {
     !aboveAvg &&
     averageSteps > 0 &&
     todaySteps >= averageSteps * 0.85;
-
-  const handleEditGoal = () => {
-    Alert.prompt(
-      'Daily Step Goal',
-      'Enter your step goal:',
-      (value) => {
-        const n = parseInt(value.replace(/,/g, ''), 10);
-        if (!isNaN(n) && n > 0) {
-          setStepGoal(n);
-          AsyncStorage.setItem('stepGoal', String(n));
-        }
-      },
-      'plain-text',
-      String(stepGoal),
-      'number-pad',
-    );
-  };
 
   const now = new Date();
   const dateStr = `${DAYS[now.getDay()]} ${MONTHS[now.getMonth()]} ${now.getDate()}`;
@@ -254,30 +232,6 @@ export const HomeScreen: React.FC = () => {
           <StepChart data={chartData} value={todaySteps} monthlyData={monthlyChartData} stepGoal={stepGoal} loading={isLoading} />
         </View>
 
-        {/* Break */}
-        <View style={styles.sectionBreak} />
-
-        {/* Goal section — below chart */}
-        <View style={styles.goalSection}>
-          <TouchableOpacity onPress={handleEditGoal}>
-            <Text style={styles.sectionLabel}>
-              {'DAILY GOAL '}{formatNumber(stepGoal)}
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.highlightRow}>
-            <Text style={styles.metricLabel}>CURRENT STREAK</Text>
-            <Text style={[styles.metricValue, { color: streakColor }]}>
-              {ready ? String(streak) : '--'}
-            </Text>
-          </View>
-          <View style={styles.highlightRow}>
-            <Text style={styles.metricLabel}>LAST 30D</Text>
-            <Text style={styles.metricValue}>
-              {ready ? formatNumber(last30Days) : '--'}
-            </Text>
-          </View>
-        </View>
-
         {/* Error state */}
         {!isLoading && !isAuthorized && (
           <Text style={styles.errorText}>
@@ -320,7 +274,7 @@ const styles = StyleSheet.create({
 
   // Big break below header
   headerBreak: {
-    height: 80,
+    height: 120,
   },
 
   // Date

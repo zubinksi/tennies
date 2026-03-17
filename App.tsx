@@ -110,8 +110,6 @@ function AppContent() {
     setScreen(target);
   };
 
-  const showNavBar = screen !== 'share';
-
   return (
     <View style={styles.root}>
       {screen === 'home' && <HomeScreen />}
@@ -123,9 +121,7 @@ function AppContent() {
           onBack={() => setScreen('home')}
         />
       )}
-      {showNavBar && (
-        <NavBar activeScreen={screen} onNavigate={handleNavigate} />
-      )}
+      <NavBar activeScreen={screen} onNavigate={handleNavigate} />
     </View>
   );
 }

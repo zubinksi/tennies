@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Dimensions,
   Alert,
   Share,
 } from 'react-native';
@@ -24,9 +23,6 @@ try {
 } catch (_e) {
   // Native module not available; image capture will be disabled.
 }
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.72;
 
 export interface NarrativeParts {
   steps: string;
@@ -51,7 +47,7 @@ const formatShareDate = (): string => {
 
 const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack }) => {
+export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack: _onBack }) => {
   const captureRef = useRef<any>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
@@ -110,12 +106,10 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      {/* Header */}
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      {/* Fixed Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>TENNIES</Text>
       </View>
 
       {/* Content */}
@@ -123,8 +117,10 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
         {!imageUri ? (
           /* Placeholder picker UI */
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderHeading}>Add a photo</Text>
-            <Text style={styles.placeholderSub}>Your walk summary will be overlaid on the image.</Text>
+            <View style={styles.headerBreak} />
+            <Text style={styles.placeholderHeading}>SHARE YOUR STEPS</Text>
+            <View style={styles.textBreak} />
+            <Text style={styles.placeholderSub}>A DAILY WALK SUMMARY TO SHARE WITH FRIENDS</Text>
             <TouchableOpacity style={styles.pickButton} onPress={takePhoto}>
               <Text style={styles.pickButtonText}>Take Photo</Text>
             </TouchableOpacity>
@@ -171,7 +167,7 @@ export const ShareScreen: React.FC<ShareScreenProps> = ({ narrativeParts, onBack
         )}
       </View>
 
-      {/* Bottom actions */}
+      {/* Bottom actions when image selected */}
       {imageUri && (
         <View style={styles.bottomBar}>
           <TouchableOpacity style={styles.changeButton} onPress={() => setImageUri(null)}>
@@ -200,19 +196,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEBEB',
   },
 
-  // Header
+  // Fixed header (same as other screens)
   header: {
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    justifyContent: 'center',
+    backgroundColor: '#EBEBEB',
   },
-  backButton: {
-    alignSelf: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 22,
-    color: colors.text,
+  headerTitle: {
+    fontFamily: 'Menlo',
+    fontSize: 15,
     fontWeight: '400',
+    color: colors.textMuted,
+    letterSpacing: 0,
   },
 
   // Main content area
@@ -221,25 +217,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
 
+  // Spacer below header (same 120px as other screens)
+  headerBreak: {
+    height: 120,
+  },
+
+  // Small break between heading and sub text
+  textBreak: {
+    height: spacing.sm,
+  },
+
   // Placeholder (no image selected)
   placeholder: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: spacing.md,
   },
   placeholderHeading: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.xs,
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: colors.textMuted,
   },
   placeholderSub: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.lg,
+    fontFamily: 'Menlo',
+    fontSize: 15,
+    fontWeight: '400',
+    color: '#000000',
   },
   pickButton: {
     width: '100%',

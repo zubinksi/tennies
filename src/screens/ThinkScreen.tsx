@@ -437,6 +437,10 @@ export const ThinkScreen: React.FC = () => {
                     </TouchableOpacity>
                   </View>
 
+                  {meta.walkSpeedMph != null && (
+                    <Text style={styles.memoSpeed}>{meta.walkSpeedMph} mph</Text>
+                  )}
+
                   <View style={styles.memoMeta}>
                     {meta.stepCount != null && (
                       <Text style={styles.memoTag}>
@@ -515,7 +519,7 @@ const styles = StyleSheet.create({
 
   // Large spacer below header
   headerBreak: {
-    height: 80,
+    height: 120,
   },
 
   // Section label
@@ -523,7 +527,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Menlo',
     fontSize: 15,
     fontWeight: '400',
-    color: colors.textMuted,
+    color: '#FF7E7E',
     marginBottom: 8,
   },
 
@@ -588,8 +592,8 @@ const styles = StyleSheet.create({
   },
   bar: {
     flex: 1,
-    borderRadius: 2,
-    minHeight: 3,
+    borderRadius: 1,
+    minHeight: 1,
   },
 
   // Bottom row of recorder card
@@ -638,6 +642,8 @@ const styles = StyleSheet.create({
   memoCard: {
     backgroundColor: '#EBEBEB',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
     padding: spacing.md,
     gap: spacing.xs,
   },
@@ -650,6 +656,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     color: colors.text,
+  },
+  memoSpeed: {
+    fontFamily: 'Menlo',
+    fontSize: 13,
+    fontWeight: '400',
+    color: colors.textMuted,
   },
   memoMeta: {
     flexDirection: 'row',

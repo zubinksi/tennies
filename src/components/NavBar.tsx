@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Menlo',
     fontSize: 15,
     fontWeight: '400',
-    color: colors.text,
+    color: colors.textMuted,
   },
   labelActive: {
     fontWeight: '700',
