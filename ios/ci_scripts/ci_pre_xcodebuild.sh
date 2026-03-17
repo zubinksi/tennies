@@ -34,4 +34,4 @@ cd "$CI_PRIMARY_REPOSITORY_PATH/ios"
 # Remove stale Pods and Podfile.lock so pod install resolves fresh from node_modules
 rm -rf Pods
 rm -f Podfile.lock
-pod install
+pod install --no-repo-update
