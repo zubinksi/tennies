@@ -27,7 +27,17 @@ echo "Wrote NODE_BINARY=$(command -v node) to .xcode.env.local"
 
 echo "Installing npm dependencies..."
 cd "$CI_PRIMARY_REPOSITORY_PATH"
-npm ci
+# Retry npm ci up to 3 times to handle transient network errors (ECONNRESET)
+for attempt in 1 2 3; do
+  echo "npm ci attempt $attempt..."
+  npm ci --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 && break
+  if [ $attempt -eq 3 ]; then
+    echo "npm ci failed after 3 attempts"
+    exit 1
+  fi
+  echo "npm ci failed, retrying in $((attempt * 10))s..."
+  sleep $((attempt * 10))
+done
 
 echo "Installing CocoaPods dependencies..."
 cd "$CI_PRIMARY_REPOSITORY_PATH/ios"
