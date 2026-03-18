@@ -44,4 +44,16 @@ cd "$CI_PRIMARY_REPOSITORY_PATH/ios"
 # Remove stale Pods and Podfile.lock so pod install resolves fresh from node_modules
 rm -rf Pods
 rm -f Podfile.lock
-pod install --no-repo-update
+# Disable CocoaPods stats to avoid unnecessary network calls
+export COCOAPODS_DISABLE_STATS=1
+# Retry pod install up to 3 times to handle transient network errors (Net::OpenTimeout)
+for attempt in 1 2 3; do
+  echo "pod install attempt $attempt..."
+  pod install --no-repo-update && break
+  if [ $attempt -eq 3 ]; then
+    echo "pod install failed after 3 attempts"
+    exit 1
+  fi
+  echo "pod install failed, retrying in $((attempt * 10))s..."
+  sleep $((attempt * 10))
+done
